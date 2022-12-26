@@ -2006,3 +2006,119 @@
 [2022-12-26 12:30:10,676:INFO:mainLog:MainThread] Category filling is done
 [2022-12-26 12:30:11,636:INFO:mainLog:MainThread] Body request has been sent
 [2022-12-26 12:30:11,649:WARNING:mainLog:MainThread] SKU_ALREADY_EXISTS: 111011 | Error Message: Field 'sku' must be unique. | Error code: SKU_ALREADY_EXISTS
+[2022-12-26 13:53:43,466:INFO:mainLog:MainThread] Scraper started
+[2022-12-26 13:54:31,706:INFO:mainLog:Thread-7 (dump_categories)] Category dump is successfull
+[2022-12-26 13:56:23,111:INFO:mainLog:MainThread] Media request with index 0 has been added
+[2022-12-26 13:56:23,115:INFO:mainLog:MainThread] Media request with index 1 has been added
+[2022-12-26 13:56:23,119:INFO:mainLog:MainThread] Media request with index 2 has been added
+[2022-12-26 13:56:23,123:INFO:mainLog:MainThread] Media request with index 3 has been added
+[2022-12-26 13:56:23,129:INFO:mainLog:MainThread] Media request with index 4 has been added
+[2022-12-26 13:56:23,133:INFO:mainLog:MainThread] Text request with index 5 has been added
+[2022-12-26 13:56:23,849:INFO:mainLog:MainThread] Text has been processed
+[2022-12-26 13:56:24,070:INFO:mainLog:MainThread] Category processed successfully | Arabic: أطقم
+[2022-12-26 13:56:24,076:INFO:mainLog:MainThread] Options have been populated
+[2022-12-26 13:56:24,080:INFO:mainLog:MainThread] Category filling is done
+[2022-12-26 13:56:25,051:INFO:mainLog:MainThread] Body request has been sent
+[2022-12-26 13:56:25,051:INFO:mainLog:MainThread] Product created successfully with ID: 519873177 | SKU: 111021
+[2022-12-26 13:56:27,528:INFO:mainLog:MainThread] Main image upload is successful | Status code: 200 | Reason: OK | Image name: media\photo1.jpg
+[2022-12-26 13:56:29,765:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:56:32,092:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:56:34,508:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:56:34,522:INFO:mainLog:MainThread] Media request with index 5 has been added
+[2022-12-26 13:56:34,527:INFO:mainLog:MainThread] Media request with index 6 has been added
+[2022-12-26 13:56:34,531:INFO:mainLog:MainThread] Text request with index 7 has been added
+[2022-12-26 13:56:35,256:INFO:mainLog:MainThread] Text has been processed
+[2022-12-26 13:56:35,474:INFO:mainLog:MainThread] Category processed successfully | Arabic: بنطلونات
+[2022-12-26 13:56:35,490:INFO:mainLog:MainThread] Options have been populated
+[2022-12-26 13:56:35,498:INFO:mainLog:MainThread] Category filling is done
+[2022-12-26 13:56:36,458:INFO:mainLog:MainThread] Body request has been sent
+[2022-12-26 13:56:36,458:INFO:mainLog:MainThread] Product created successfully with ID: 519877783 | SKU: 111022
+[2022-12-26 13:56:39,674:INFO:mainLog:MainThread] Main image upload is successful | Status code: 200 | Reason: OK | Image name: media\photo1.jpg
+[2022-12-26 13:56:42,779:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:56:42,796:INFO:mainLog:MainThread] Media request with index 7 has been added
+[2022-12-26 13:56:42,800:INFO:mainLog:MainThread] Media request with index 8 has been added
+[2022-12-26 13:56:42,806:INFO:mainLog:MainThread] Media request with index 9 has been added
+[2022-12-26 13:56:42,810:INFO:mainLog:MainThread] Media request with index 10 has been added
+[2022-12-26 13:56:42,814:INFO:mainLog:MainThread] Media request with index 11 has been added
+[2022-12-26 13:56:42,819:INFO:mainLog:MainThread] Media request with index 12 has been added
+[2022-12-26 13:56:42,823:INFO:mainLog:MainThread] Text request with index 13 has been added
+[2022-12-26 13:56:43,672:INFO:mainLog:MainThread] Text has been processed
+[2022-12-26 13:56:43,884:WARNING:mainLog:MainThread] Category قمصان وبلايز is not on the list
+[2022-12-26 13:56:43,884:INFO:mainLog:MainThread] Options have been populated
+[2022-12-26 13:56:43,903:INFO:mainLog:MainThread] Category filling is done
+[2022-12-26 13:56:44,901:INFO:mainLog:MainThread] Body request has been sent
+[2022-12-26 13:56:44,901:INFO:mainLog:MainThread] Product created successfully with ID: 519877102 | SKU: 111023
+[2022-12-26 13:56:47,459:INFO:mainLog:MainThread] Main image upload is successful | Status code: 200 | Reason: OK | Image name: media\photo1.jpg
+[2022-12-26 13:56:49,826:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:56:51,889:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:56:54,290:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:56:56,634:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:56:59,007:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:56:59,023:INFO:mainLog:MainThread] Media request with index 13 has been added
+[2022-12-26 13:56:59,027:INFO:mainLog:MainThread] Media request with index 14 has been added
+[2022-12-26 13:56:59,032:INFO:mainLog:MainThread] Text request with index 15 has been added
+[2022-12-26 13:56:59,568:INFO:mainLog:MainThread] Text has been processed
+[2022-12-26 13:57:01,825:INFO:mainLog:MainThread] Category processed successfully | Arabic: فساتين كاجوال
+[2022-12-26 13:57:01,833:INFO:mainLog:MainThread] Options have been populated
+[2022-12-26 13:57:01,837:INFO:mainLog:MainThread] Category filling is done
+[2022-12-26 13:57:02,742:INFO:mainLog:MainThread] Body request has been sent
+[2022-12-26 13:57:02,742:INFO:mainLog:MainThread] Product created successfully with ID: 519878166 | SKU: 111024
+[2022-12-26 13:57:05,698:INFO:mainLog:MainThread] Main image upload is successful | Status code: 200 | Reason: OK | Image name: media\photo1.jpg
+[2022-12-26 13:57:08,410:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:57:08,417:INFO:mainLog:MainThread] Media request with index 15 has been added
+[2022-12-26 13:57:08,422:INFO:mainLog:MainThread] Media request with index 16 has been added
+[2022-12-26 13:57:08,427:INFO:mainLog:MainThread] Media request with index 17 has been added
+[2022-12-26 13:57:08,431:INFO:mainLog:MainThread] Media request with index 18 has been added
+[2022-12-26 13:57:08,435:INFO:mainLog:MainThread] Media request with index 19 has been added
+[2022-12-26 13:57:08,440:INFO:mainLog:MainThread] Media request with index 20 has been added
+[2022-12-26 13:57:08,444:INFO:mainLog:MainThread] Media request with index 21 has been added
+[2022-12-26 13:57:08,448:INFO:mainLog:MainThread] Media request with index 22 has been added
+[2022-12-26 13:57:08,454:INFO:mainLog:MainThread] Text request with index 23 has been added
+[2022-12-26 13:57:10,531:INFO:mainLog:MainThread] Text has been processed
+[2022-12-26 13:57:10,773:INFO:mainLog:MainThread] Category processed successfully | Arabic: أطقم
+[2022-12-26 13:57:10,788:INFO:mainLog:MainThread] Options have been populated
+[2022-12-26 13:57:10,795:INFO:mainLog:MainThread] Category filling is done
+[2022-12-26 13:57:11,736:INFO:mainLog:MainThread] Body request has been sent
+[2022-12-26 13:57:11,740:INFO:mainLog:MainThread] Product created successfully with ID: 519877785 | SKU: 111025
+[2022-12-26 13:57:14,638:INFO:mainLog:MainThread] Main image upload is successful | Status code: 200 | Reason: OK | Image name: media\photo1.jpg
+[2022-12-26 13:57:17,641:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:57:20,548:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:57:23,599:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:57:26,649:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:57:29,604:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:57:33,072:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:57:36,297:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:57:36,312:INFO:mainLog:MainThread] Media request with index 23 has been added
+[2022-12-26 13:57:36,322:INFO:mainLog:MainThread] Media request with index 24 has been added
+[2022-12-26 13:57:36,329:INFO:mainLog:MainThread] Media request with index 25 has been added
+[2022-12-26 13:57:36,334:INFO:mainLog:MainThread] Media request with index 26 has been added
+[2022-12-26 13:57:36,339:INFO:mainLog:MainThread] Text request with index 27 has been added
+[2022-12-26 13:57:37,011:INFO:mainLog:MainThread] Text has been processed
+[2022-12-26 13:57:37,255:INFO:mainLog:MainThread] Category processed successfully | Arabic: فساتين كاجوال
+[2022-12-26 13:57:37,255:INFO:mainLog:MainThread] Options have been populated
+[2022-12-26 13:57:37,272:INFO:mainLog:MainThread] Category filling is done
+[2022-12-26 13:57:38,158:INFO:mainLog:MainThread] Body request has been sent
+[2022-12-26 13:57:38,162:INFO:mainLog:MainThread] Product created successfully with ID: 519878167 | SKU: 111026
+[2022-12-26 13:57:40,289:INFO:mainLog:MainThread] Main image upload is successful | Status code: 200 | Reason: OK | Image name: media\photo1.jpg
+[2022-12-26 13:57:43,066:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:57:45,136:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:57:47,090:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:57:47,095:INFO:mainLog:MainThread] Media request with index 27 has been added
+[2022-12-26 13:57:47,099:INFO:mainLog:MainThread] Media request with index 28 has been added
+[2022-12-26 13:57:47,104:INFO:mainLog:MainThread] Media request with index 29 has been added
+[2022-12-26 13:57:47,108:INFO:mainLog:MainThread] Media request with index 30 has been added
+[2022-12-26 13:57:47,113:INFO:mainLog:MainThread] Media request with index 31 has been added
+[2022-12-26 13:57:47,118:INFO:mainLog:MainThread] Media request with index 32 has been added
+[2022-12-26 13:57:47,122:INFO:mainLog:MainThread] Text request with index 33 has been added
+[2022-12-26 13:57:48,828:INFO:mainLog:MainThread] Text has been processed
+[2022-12-26 13:57:49,074:INFO:mainLog:MainThread] Category processed successfully | Arabic: فساتين كاجوال
+[2022-12-26 13:57:49,082:INFO:mainLog:MainThread] Options have been populated
+[2022-12-26 13:57:49,088:INFO:mainLog:MainThread] Category filling is done
+[2022-12-26 13:57:50,014:INFO:mainLog:MainThread] Body request has been sent
+[2022-12-26 13:57:50,029:INFO:mainLog:MainThread] Product created successfully with ID: 519876575 | SKU: 111027
+[2022-12-26 13:57:52,847:INFO:mainLog:MainThread] Main image upload is successful | Status code: 200 | Reason: OK | Image name: media\photo1.jpg
+[2022-12-26 13:57:55,478:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:57:58,983:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:58:02,027:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:58:05,060:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 13:58:08,415:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
