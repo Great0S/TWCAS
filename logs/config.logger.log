@@ -2122,3 +2122,104 @@
 [2022-12-26 13:58:02,027:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
 [2022-12-26 13:58:05,060:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
 [2022-12-26 13:58:08,415:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:53:26,502:INFO:mainLog:MainThread] Media request with index 33 has been added
+[2022-12-26 14:53:26,522:INFO:mainLog:MainThread] Media request with index 34 has been added
+[2022-12-26 14:53:26,527:INFO:mainLog:MainThread] Media request with index 35 has been added
+[2022-12-26 14:53:26,533:INFO:mainLog:MainThread] Media request with index 36 has been added
+[2022-12-26 14:53:26,538:INFO:mainLog:MainThread] Media request with index 37 has been added
+[2022-12-26 14:53:26,545:INFO:mainLog:MainThread] Media request with index 38 has been added
+[2022-12-26 14:53:26,550:INFO:mainLog:MainThread] Media request with index 39 has been added
+[2022-12-26 14:53:26,554:INFO:mainLog:MainThread] Media request with index 40 has been added
+[2022-12-26 14:53:26,559:INFO:mainLog:MainThread] Media request with index 41 has been added
+[2022-12-26 14:53:26,564:INFO:mainLog:MainThread] Media request with index 42 has been added
+[2022-12-26 14:53:26,568:INFO:mainLog:MainThread] Text request with index 43 has been added
+[2022-12-26 14:53:28,915:INFO:mainLog:MainThread] Text has been processed
+[2022-12-26 14:53:29,189:WARNING:mainLog:MainThread] Category قمصان وبلايز is not on the list
+[2022-12-26 14:53:29,193:INFO:mainLog:MainThread] Options have been populated
+[2022-12-26 14:53:29,198:INFO:mainLog:MainThread] Category filling is done
+[2022-12-26 14:53:30,155:INFO:mainLog:MainThread] Body request has been sent
+[2022-12-26 14:53:30,166:INFO:mainLog:MainThread] Product created successfully with ID: 519878240 | SKU: 111028
+[2022-12-26 14:53:33,093:INFO:mainLog:MainThread] Main image upload is successful | Status code: 200 | Reason: OK | Image name: media\photo1.jpg
+[2022-12-26 14:53:35,743:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:53:38,796:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:53:41,422:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:53:44,061:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:53:46,811:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:53:49,980:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:53:53,062:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:53:56,028:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:53:58,684:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:53:58,692:INFO:mainLog:MainThread] Media request with index 43 has been added
+[2022-12-26 14:53:58,696:INFO:mainLog:MainThread] Media request with index 44 has been added
+[2022-12-26 14:53:58,701:INFO:mainLog:MainThread] Media request with index 45 has been added
+[2022-12-26 14:53:58,705:INFO:mainLog:MainThread] Media request with index 46 has been added
+[2022-12-26 14:53:58,710:INFO:mainLog:MainThread] Media request with index 47 has been added
+[2022-12-26 14:53:58,714:INFO:mainLog:MainThread] Media request with index 48 has been added
+[2022-12-26 14:53:58,719:INFO:mainLog:MainThread] Media request with index 49 has been added
+[2022-12-26 14:53:58,723:INFO:mainLog:MainThread] Media request with index 50 has been added
+[2022-12-26 14:53:58,727:INFO:mainLog:MainThread] Media request with index 51 has been added
+[2022-12-26 14:53:58,732:INFO:mainLog:MainThread] Media request with index 52 has been added
+[2022-12-26 14:53:58,735:INFO:mainLog:MainThread] Text request with index 53 has been added
+[2022-12-26 14:54:01,716:INFO:mainLog:MainThread] Text has been processed
+[2022-12-26 14:54:01,929:WARNING:mainLog:MainThread] Category قمصان وبلايز is not on the list
+[2022-12-26 14:54:01,933:INFO:mainLog:MainThread] Options have been populated
+[2022-12-26 14:54:01,937:INFO:mainLog:MainThread] Category filling is done
+[2022-12-26 14:54:02,874:INFO:mainLog:MainThread] Body request has been sent
+[2022-12-26 14:54:02,878:INFO:mainLog:MainThread] Product created successfully with ID: 519879682 | SKU: 111029
+[2022-12-26 14:54:06,170:INFO:mainLog:MainThread] Main image upload is successful | Status code: 200 | Reason: OK | Image name: media\photo1.jpg
+[2022-12-26 14:54:09,342:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:54:12,090:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:54:15,316:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:54:18,493:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:54:21,937:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:54:25,163:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:54:28,089:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:54:31,222:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:54:33,861:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:54:33,878:INFO:mainLog:MainThread] Media request with index 53 has been added
+[2022-12-26 14:54:33,882:INFO:mainLog:MainThread] Media request with index 54 has been added
+[2022-12-26 14:54:33,888:INFO:mainLog:MainThread] Media request with index 55 has been added
+[2022-12-26 14:54:33,893:INFO:mainLog:MainThread] Media request with index 56 has been added
+[2022-12-26 14:54:33,897:INFO:mainLog:MainThread] Media request with index 57 has been added
+[2022-12-26 14:54:33,902:INFO:mainLog:MainThread] Media request with index 58 has been added
+[2022-12-26 14:54:33,906:INFO:mainLog:MainThread] Media request with index 59 has been added
+[2022-12-26 14:54:33,911:INFO:mainLog:MainThread] Media request with index 60 has been added
+[2022-12-26 14:54:33,916:INFO:mainLog:MainThread] Media request with index 61 has been added
+[2022-12-26 14:54:33,921:INFO:mainLog:MainThread] Media request with index 62 has been added
+[2022-12-26 14:54:33,925:INFO:mainLog:MainThread] Text request with index 63 has been added
+[2022-12-26 14:54:35,345:INFO:mainLog:MainThread] Text has been processed
+[2022-12-26 14:54:35,574:WARNING:mainLog:MainThread] Category قمصان وبلايز is not on the list
+[2022-12-26 14:54:35,582:INFO:mainLog:MainThread] Options have been populated
+[2022-12-26 14:54:35,588:INFO:mainLog:MainThread] Category filling is done
+[2022-12-26 14:54:36,567:INFO:mainLog:MainThread] Body request has been sent
+[2022-12-26 14:54:36,571:INFO:mainLog:MainThread] Product created successfully with ID: 519876737 | SKU: 111030
+[2022-12-26 14:54:39,216:INFO:mainLog:MainThread] Main image upload is successful | Status code: 200 | Reason: OK | Image name: media\photo1.jpg
+[2022-12-26 14:54:41,920:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:54:44,683:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:54:47,220:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:54:49,905:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:54:52,485:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:54:54,968:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:54:57,577:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:54:59,922:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:55:02,749:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:55:02,754:INFO:mainLog:MainThread] Media request with index 63 has been added
+[2022-12-26 14:55:02,758:INFO:mainLog:MainThread] Media request with index 64 has been added
+[2022-12-26 14:55:02,763:INFO:mainLog:MainThread] Media request with index 65 has been added
+[2022-12-26 14:55:02,768:INFO:mainLog:MainThread] Media request with index 66 has been added
+[2022-12-26 14:55:02,773:INFO:mainLog:MainThread] Media request with index 67 has been added
+[2022-12-26 14:55:02,777:INFO:mainLog:MainThread] Media request with index 68 has been added
+[2022-12-26 14:55:02,782:INFO:mainLog:MainThread] Media request with index 69 has been added
+[2022-12-26 14:55:02,786:INFO:mainLog:MainThread] Text request with index 70 has been added
+[2022-12-26 14:55:04,176:INFO:mainLog:MainThread] Text has been processed
+[2022-12-26 14:55:04,390:WARNING:mainLog:MainThread] Category قمصان وبلايز is not on the list
+[2022-12-26 14:55:04,403:INFO:mainLog:MainThread] Options have been populated
+[2022-12-26 14:55:04,409:INFO:mainLog:MainThread] Category filling is done
+[2022-12-26 14:55:05,385:INFO:mainLog:MainThread] Body request has been sent
+[2022-12-26 14:55:05,389:INFO:mainLog:MainThread] Product created successfully with ID: 519876738 | SKU: 111031
+[2022-12-26 14:55:08,126:INFO:mainLog:MainThread] Main image upload is successful | Status code: 200 | Reason: OK | Image name: media\photo1.jpg
+[2022-12-26 14:55:10,869:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:55:13,512:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:55:16,042:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:55:18,903:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
+[2022-12-26 14:55:21,797:INFO:mainLog:MainThread] Gallery image uploaded successfully | Status code: 200 | Reason: OK
