@@ -1,10 +1,13 @@
 import requests
 from config.settings import settings
+from app.celery_server import celery
+
 
 logger = settings.logger
 
 # Uploads main image
-async def upload_main_image(ItemId, Main):
+@celery.task()
+def upload_main_image(ItemId, Main):
     main_image_data = open(Main, 'rb').read()
     main_image_response = requests.post(
         f'https://app.ecwid.com/api/v3/63690252/products/{ItemId}/image?token=secret_4i936SRqRp3317MZ51Aa4tVjeUVyGwW7',
@@ -15,7 +18,8 @@ async def upload_main_image(ItemId, Main):
     )
 
 # Adding gallery images to the product
-async def gallery_uploader(ItemId, media_path,  Main):
+@celery.task()
+def gallery_uploader(ItemId, media_path,  Main):
     
     for img in media_path:
         if img is not None and img != Main:            

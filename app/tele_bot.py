@@ -1,5 +1,6 @@
-from telethon import TelegramClient
+from telethon.sync import TelegramClient
 from config.settings import settings
+
 
 bot = TelegramClient(session=settings.session_name,
                      api_id=settings.api_id,

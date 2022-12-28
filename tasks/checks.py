@@ -7,7 +7,7 @@ from config.settings import settings
 
 logger = settings.logger
 
-async def media_check(media_path):
+def media_check(media_path):
     global GifFile, count
     video_files = []
     VidTypes = ['video/mp4', 'video/avi', 'video/mkv', 'video/mpeg']
@@ -24,7 +24,8 @@ async def media_check(media_path):
                 break
     return video_files
 
-async def vid2Gif(video):
+
+def vid2Gif(video):
     global GifFile, count
     count += 1
     GifFile = f'media/animpic{str(count)}.gif'
@@ -44,7 +45,7 @@ async def vid2Gif(video):
     logger.info(f"New gif file have been created | File name: {GifFile}")
     return GifFile
 
-async def clear_all(media_path):
+def clear_all(media_path):
     media_path['image'].clear()
     media_path['grouped_id'].clear()
     Files = glob.glob('media/*')

@@ -9,13 +9,15 @@ from models.category_processor import category_processor
 from models.options_processor import options_fill
 from models.text_processor import text_processor
 from tasks.checks import clear_all
+from app.celery_server import celery
 
 logger = settings.logger
-turk_translate = settings.turk_translate
-english_translate = settings.english_translate
+arabic_translate = settings.arabic_translate
+
 
 # Creates a product and assign the main product image
-async def create_product(message, MCategory, categories, media_path):
+@celery.task()
+def create_product(message, MCategory, categories, media_path):
     global ResContent, Main, body, seoNameEn
 
     # Checking message type
@@ -34,14 +36,14 @@ async def create_product(message, MCategory, categories, media_path):
 
             # Creating variables with ready to use data from telegram message
             name = RefinedTxt[1].strip()
-            nameEn = turk_translate.translate(name)
+            nameEn = arabic_translate.translate(name)
             nameEn = re.sub('a ', '', nameEn)
             nameEn = nameEn.capitalize()
             # Checking for invalid criteria
             if re.search('السيري', name) or re.search('السيري', name):
                 clear_all(media_path)
                 logger.error(
-                    f'Invalid name found ')
+                    'Invalid name found')
                 return
 
             size = RefinedTxt[2]
@@ -94,7 +96,6 @@ async def create_product(message, MCategory, categories, media_path):
                         if catNam == secName:
                             seoNameEn = categories['name'].index(catNam)
                             break
-
                 seoNameEn = categories['nameEn'][seoNameEn] + ' / ' + nameEn
                 seoName = secName + ' / ' + name
             else:
@@ -174,7 +175,7 @@ async def create_product(message, MCategory, categories, media_path):
                 logger.warning(
                     f"SKU_ALREADY_EXISTS: {sku} | Error Message: {ResContent['errorMessage']} | Error code: {ResContent['errorCode']}"
                 )
-                await clear_all(media_path)
+                clear_all(media_path)
                 return None
             else:
                 logger.info(

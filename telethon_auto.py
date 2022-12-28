@@ -1,16 +1,21 @@
 import asyncio
-from logging import config
+import glob
 import logging
 import os
 import re
 import time
+from logging import config
 
-from telethon import events, errors
-from config.settings import settings
-from config.logger import log_config
+from telethon import errors, events
+
 from app.tele_bot import bot as client
-from app.tasks import clear_all, create_product, incoming_message_processor, media_check, vid2Gif, uploader, UploadMainIMG
-from extraction.dump_category import check_category
+from config.logger import log_config
+from config.settings import settings
+from models.dump_category import check_category
+from tasks.checks import (incoming_message_check, media_check,
+                          vid2Gif)
+from tasks.create_products import create_product
+from tasks.uploader import gallery_uploader, upload_main_image
 
 config.dictConfig(log_config)
 logger = logging.getLogger('mainLog')
@@ -23,13 +28,21 @@ client.start(phone=settings.phone)
 client.flood_sleep_threshold = 0
 
 
+def clear_all(media_path):
+    media_path['image'].clear()
+    media_path['grouped_id'].clear()
+    Files = glob.glob('media/*')
+    for file in Files:
+        os.remove(file)
+        
+
 @client.on(events.NewMessage(chats=kadin_ids))
 async def handler(event):
     global old_requests, media_path, count, messageDate, MCategory, kadin_ids, url
     global messageGroupID, responseData, Cmessage, Main, categories, reqResponse
     try:
-        channel = event.message.input_chat
-        request = incoming_message_processor(event)
+        channel = client.session.get_input_entity(event.message.chat_id)
+        request = incoming_message_check(event)
         if request.photo or request.video:
             media_files.append(event.id)
             logger.info(
@@ -53,13 +66,13 @@ async def handler(event):
             client.receive_updates = False
 
             if messageGroupID:
-                await asyncio.sleep(15)
-                await clear_all(media_path)
+                clear_all(media_path)
                 await download_media_files(channel)
+                media_files.clear()
 
             if Cmessage:
                 Main = None
-                responseData = await create_product(
+                responseData = create_product(
                     Cmessage, MCategory, categories, media_path)
                 Cmessage = messageDate = None
 
@@ -67,10 +80,10 @@ async def handler(event):
                 if any(media_path['image']):
 
                     # Media check
-                    video_files = await media_check(media_path)
+                    video_files = media_check(media_path)
                     if video_files:
                         for video in video_files:
-                            video_processing = await vid2Gif(video)
+                            video_processing = vid2Gif(video)
                             media_path['image'].append(
                                     video_processing)
                             if re.search('.mp4', video):
@@ -79,17 +92,17 @@ async def handler(event):
 
                     # Uploads main image
                     Main = media_path['image'][0]
-                    await UploadMainIMG(responseData, Main)
+                    upload_main_image(responseData, Main)
 
                     if messageGroupID == media_path['grouped_id'][0]:
                         # Uploads gallery images
-                        await uploader(responseData, media_path['image'], Main)
-                        await clear_all(media_path)
+                        gallery_uploader(responseData, media_path['image'], Main)
+                        clear_all(media_path)
                     else:
                         messageGroupID = None
                         logger.error(
                             f'Files has not been uploaded for product: {responseData} | Message ID: {event.id} | Reason: media group id mismatch | Message group id: {messageGroupID} | Media group id: {media_path["grouped_id"][0]}')
-                        await clear_all(media_path)
+                        clear_all(media_path)
                         client.receive_updates = True
 
 
@@ -105,7 +118,7 @@ async def handler(event):
 
 async def download_media_files(channel):
     count = 0
-    async for entity in client.iter_messages(entity=channel, wait_time=0, min_id=media_files[0], max_id=media_files[len(media_files)-1]+1):
+    async for entity in client.iter_messages(entity=channel, wait_time=1, min_id=media_files[0], max_id=media_files[len(media_files)-1]+1):
         if messageGroupID == entity.grouped_id:
             count += 1
             file = ''
@@ -121,10 +134,10 @@ async def download_media_files(channel):
                 media_path['grouped_id'].append(
                                 entity.grouped_id)
             else:
-                logger.error(
-                                f"Files download is not successful | Message ID: {entity.id}")
+                logger.error(f"Files download is not successful | Message ID: {entity.id}")
         else:
             continue
+    
 
 
 

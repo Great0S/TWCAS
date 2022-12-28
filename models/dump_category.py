@@ -45,12 +45,12 @@ def dump_categories():
 
 def check_category():
     global categories
-    File_path = 'extraction/categories.json'
+    File_path = 'dumps/categories.json'
     if os.path.exists(File_path):
         request_category = requests.get(category_url, headers=headers).json()
         category_total = int(request_category['total'])
         # Dumping categories into a dict var
-        open_json = open('extraction/categories.json', encoding='utf-8')
+        open_json = open('dumps/categories.json', encoding='utf-8')
         categories = json.load(open_json)
         if len(categories['name']) == category_total:
             pass
