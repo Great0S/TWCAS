@@ -1,4 +1,4 @@
-from configparser import ConfigParser as config
+from logging import config as Config
 import logging
 from deep_translator import GoogleTranslator
 from pydantic import BaseSettings
@@ -8,7 +8,7 @@ from config.logger import log_config
 class Settings(BaseSettings):
     
     # Logger config
-    config.dictConfig(log_config)
+    Config.dictConfig(log_config)
     logger = logging.getLogger('mainLog')
     logs_dir: str = 'logs/'
     
@@ -33,7 +33,7 @@ class Settings(BaseSettings):
 
 
     # Server Config
-    Target: str = 'https://5121-213-254-138-110.eu.ngrok.io'
+    Target: str = 'https://7e5e-213-254-138-110.eu.ngrok.io'
 
     # Ecwid info    
     category_id: int = 127443592

@@ -8,7 +8,7 @@ import logging
 from logging import config
 from flask import Response, render_template, request
 
-from app.celery import Config, Target, flask_app, chord, log_config, bot, token
+from app.celery_server import Config, Target, flask_app, chord, log_config, bot, token
 from app.tasks import UploadMainIMG, create_product, DownloadCallback, dummy, media_downloader, clearMediaList, upload_media, NewProductCallback
 
 global old_requests

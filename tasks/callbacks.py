@@ -1,4 +1,4 @@
-from app.celery import celery
+from app.celery_server import celery
 from config.settings import settings
 
 logger = settings.logger

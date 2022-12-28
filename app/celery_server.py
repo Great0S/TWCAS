@@ -1,21 +1,20 @@
 from __future__ import absolute_import
 
-from logging import config
+from logging import config as Config
 
-from celery import Celery, chord, group
+from celery import Celery, chord
 from celery.signals import setup_logging
-from flask import Flask
-
+from app import flask_app
 from config.logger import log_config
 
-group = group
 chord = chord
 
 
 # Logging config
 @setup_logging.connect
 def config_logger(*args, **kwargs):
-    config.dictConfig(log_config)
+    Config.dictConfig(log_config)
+
 
 def make_celery(app):
     celery = Celery(
@@ -33,8 +32,6 @@ def make_celery(app):
     celery.Task = ContextTask
     return celery
 
-
-flask_app = Flask(__name__)
 flask_app.config.update(
     CELERY_RESULT_BACKEND="redis://localhost:6379/0",
     CELERY_BROKER_URL="redis://localhost:6379/1"

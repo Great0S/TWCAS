@@ -1,20 +1,16 @@
 # library import
 from __future__ import absolute_import
 
-import json
-import logging
 import os
 import re
-from logging import config
 
 import requests
-from flask import Response, render_template
+from flask import Response, render_template, request
 
-from app.celery import chord, flask_app
+from app.celery_server import chord, flask_app
 from app.tele_bot import bot as client
-from config.logger import log_config
 from config.settings import settings
-from models.dump_category import categories, curl, dump_categories, eheaders
+from models.dump_category import categories, check_category
 from tasks.callbacks import NewProductCallback, dummy, mediaCallback
 from tasks.checks import clear_all, media_check, vid2Gif
 from tasks.create_products import create_product
@@ -32,22 +28,22 @@ messageDate = messageGroupID = responseData = Cmessage = Main = MCategory = cate
 def response_body(code, text):
     return Response(f'{text}', code)
 
-def check_request(req):
+def check_request(request):
     global old_requests
     if old_requests:
-        if req.json['update_id'] in old_requests:
+        if request.json['update_id'] in old_requests:
             return response_body(508, 'Repeated update')
         else:
-            old_requests.append(req.json['update_id'])
+            old_requests.append(request.json['update_id'])
 
-# Main incoming req processor
-@flask_app.post("/")
-async def index(req):
+# Main incoming request processor
+@flask_app.route("/", methods=["POST", "GET"])
+def index():
     global bot, old_requests, media_path, count, messageDate, MCategory, kadin_ids
     global messageGroupID, responseData, Cmessage, Main, categories, reqResponse
 
     try:
-        channel = req.message.input_chat
+        channel = request.message.input_chat
         
         if reqResponse.message:
             processedRequest = reqResponse.message
@@ -57,16 +53,16 @@ async def index(req):
             processedRequest = reqResponse.effective_message
         if processedRequest:
             if processedRequest.photo or processedRequest.video:
-                check_request(req)
+                check_request(request)
                 requestsList['update_id'].append(reqResponse.update_id)
                 requestsList['post'].append(
                     processedRequest)
                 logger.info(
-                    f"Processed req with index: {count} has been added")
+                    f"Processed request with index: {count} has been added")
                 count += 1
 
             if processedRequest.caption:
-                check_request(req)
+                check_request(request)
                 responseData = None
                 if processedRequest.chat_id in kadin_ids:
                     MCategory = 127443592
@@ -75,7 +71,7 @@ async def index(req):
                     return Response('ok', status=406)
 
                 logger.info(
-                    f"Caption found with index {count} | Message update ID: {req.json['update_id']}")
+                    f"Caption found with index {count} | Message update ID: {request.json['update_id']}")
                 Cmessage = processedRequest.caption
                 messageDate = processedRequest.date
                 messageGroupID = processedRequest.media_group_id
@@ -83,7 +79,7 @@ async def index(req):
 
         if messageGroupID:
                 clear_all(media_path)
-                await download_media_files(channel)
+                download_media_files(channel)
 
         if Cmessage:
             Main = None
@@ -100,7 +96,7 @@ async def index(req):
             if any(media_path['image']):
 
                 # Media check
-                video_files = await media_check(media_path)
+                video_files = media_check(media_path)
                 if video_files:
                     for video in video_files:
                         video_processing = chord(vid2Gif.subtask(
@@ -172,16 +168,16 @@ async def index(req):
 #     global reqResponse
 #     try:
 #         global old_requests
-#         if req.method == 'POST':
+#         if request.method == 'POST':
 #             if len(old_requests) >= 5000:
 #                 old_requests.clear()
-#             if hasattr(req, 'json'):
-#                 if 'update_id' in req.json:
+#             if hasattr(request, 'json'):
+#                 if 'update_id' in request.json:
 #                     if len(old_requests) > 3:
-#                         check_request(req)
-#                         old_requests.append(req.json['update_id'])
+#                         check_request(request)
+#                         old_requests.append(request.json['update_id'])
 #                     else:
-#                         old_requests.append(req.json['update_id'])
+#                         old_requests.append(request.json['update_id'])
 
 #         UpdateCount = bot.getWebhookInfo()
 #         UpdateCount = UpdateCount['pending_update_count']
@@ -216,7 +212,7 @@ def setWebhook():
         return response_body(412, "Webhook has not been set successfully")
 
 
-@flask_app.route("/main", methods=["GET", "POST"])
+@flask_app.route("/main", methods=["GET"])
 def main_page():
     return render_template("main.html")
 
@@ -233,7 +229,7 @@ async def download_media_files(channel):
             else:
                 file = f'video{count}.mp4'
 
-            NewFile = await client.download_media(entity, f"media/{file}")
+            NewFile = client.download_media(entity, f"media/{file}")
             if NewFile:
                 media_path['image'].append(
                                 NewFile)
@@ -258,34 +254,7 @@ cls()
 
 def main():
     global category_json
-    File_path = 'extraction/categories.json'
-    if os.path.exists(File_path):
-        request_category = requests.get(curl, headers=eheaders).json()
-        category_total = int(request_category['total'])
-        # Dumping categories into a dict var
-        open_json = open('extraction/categories.json', encoding='utf-8')
-        category_json = json.load(open_json)
-        if len(category_json['name']) == category_total:
-            pass
-        else:
-            from threading import Thread
-            new_thread = Thread(target=dump_categories)
-            new_thread.start()
-            new_thread.join()
-            with open(File_path, 'w', encoding='utf-8') as file:
-                json.dump(categories, file, ensure_ascii=False)
-            file.close()
-            category_json = categories
-
-    else:
-        from threading import Thread
-        new_thread = Thread(target=dump_categories)
-        new_thread.start()
-        new_thread.join()
-        with open(File_path, 'w', encoding='utf-8') as file:
-            json.dump(categories, file, ensure_ascii=False)
-        file.close()
-        category_json = categories
+    check_category()
 
     logger.info('Bot started')
 
@@ -294,6 +263,5 @@ def main():
 logger.info('Server started')
 
 if __name__ == '__main__':
-    main()
     flask_app.debug = True
     flask_app.run()
