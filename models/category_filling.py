@@ -1,14 +1,6 @@
-import logging
-from logging import config
-import re
+from config.settings import settings
 
-from config.logger import log_config
-
-config.dictConfig(log_config)
-logger = logging.getLogger('mainLog')
-
-# noinspection PyDictDuplicateKeys
-
+logger = settings.logger
 
 def category_fill(main_category, category_names, category_ids, MCategory):
     global category_name

@@ -1,11 +1,8 @@
-import logging
-from logging import config
 import re
 
-from config.logger import log_config
+from config.settings import settings
 
-config.dictConfig(log_config)
-logger = logging.getLogger('mainLog')
+logger = settings.logger
 
 # RegEx for removing special char and spliting text into lines
 def text_processor(message):

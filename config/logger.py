@@ -7,7 +7,7 @@ log_config = {
     "formatters": {
         "celeryTask": {
             "()": "celery.app.log.TaskFormatter",
-            "fmt": "[%(asctime)s: %(levelname)s/%(processName)s] %(task_name)s[%(task_id)s]:%(module)s:%(funcName)s: %(name)s - %(message)s",
+            "fmt": "[%(asctime)s: {} %(levelname)s %(message)s] ",
         },
         'default': {
             'format': '[%(asctime)s:%(levelname)s:%(name)s:%(threadName)s] %(message)s',

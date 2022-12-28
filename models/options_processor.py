@@ -1,11 +1,8 @@
-import logging
-from logging import config
 import re
 
-from config.logger import log_config
+from config.settings import settings
 
-config.dictConfig(log_config)
-logger = logging.getLogger('mainLog')
+logger = settings.logger
 
 # Extract options from processed text
 def options_fill(RefinedTxt, false, OpValues, OpBody):
@@ -36,7 +33,7 @@ def options_fill(RefinedTxt, false, OpValues, OpBody):
                 Op1NameEn = 'Pieces in a set'
             elif re.search('سعر', Op1Name):
                 Op1NameEn = 'Price per piece'
-            
+
         OpBodyValues = {
             "type": "RADIO",
                     "name": Op1NameEn,
@@ -44,9 +41,9 @@ def options_fill(RefinedTxt, false, OpValues, OpBody):
                         "ar": Op1Name,
                         "en": Op1NameEn
                     },
-                    "choices": [{"text": str(Op1Value), "priceModifier": 0, "priceModifierType": "ABSOLUTE"}],
-                    "defaultChoice": 0,
-                    "required": false
+            "choices": [{"text": str(Op1Value), "priceModifier": 0, "priceModifierType": "ABSOLUTE"}],
+            "defaultChoice": 0,
+            "required": false
         },
 
         OpBody.extend(OpBodyValues)

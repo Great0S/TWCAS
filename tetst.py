@@ -1,3 +1,4 @@
+import asyncio
 from logging import config
 import logging
 import os
@@ -52,6 +53,7 @@ async def handler(event):
             client.receive_updates = False
 
             if messageGroupID:
+                await asyncio.sleep(15)
                 await clear_all(media_path)
                 await download_media_files(channel)
 
@@ -103,7 +105,7 @@ async def handler(event):
 
 async def download_media_files(channel):
     count = 0
-    async for entity in client.iter_messages(entity=channel, wait_time=1, min_id=media_files[0], max_id=media_files[len(media_files)-1]+1):
+    async for entity in client.iter_messages(entity=channel, wait_time=0, min_id=media_files[0], max_id=media_files[len(media_files)-1]+1):
         if messageGroupID == entity.grouped_id:
             count += 1
             file = ''

@@ -1,11 +1,6 @@
-import logging
-from logging import config
+from config.settings import settings
 
-from config.logger import log_config
-
-config.dictConfig(log_config)
-logger = logging.getLogger('mainLog')
-
+logger = settings.logger
 
 def category_processor(telegram_category, main_category, category_names):
     try:

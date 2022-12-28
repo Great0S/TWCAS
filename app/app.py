@@ -8,27 +8,25 @@ import re
 from logging import config
 
 import requests
-import telegram
-from fastapi import Response
-from fastapi import Request as FARequest
-import uvicorn
+from flask import Response, render_template
 
-from config.logger import Target, bot, chord, fastapi_app, log_config, token
-from app.tasks import (DownloadCallback, NewProductCallback, UploadMainIMG,
-                       clearMediaList, create_product, dummy, media_check,
-                       media_downloader, mediaCallback, uploader, vid2Gif)
-from extraction.dump_category import (categories, curl, dump_categories,
-                                      eheaders)
+from app.celery import chord, flask_app
+from app.tele_bot import bot as client
+from config.logger import log_config
+from config.settings import settings
+from models.dump_category import categories, curl, dump_categories, eheaders
+from tasks.callbacks import NewProductCallback, dummy, mediaCallback
+from tasks.checks import clear_all, media_check, vid2Gif
+from tasks.create_products import create_product
+from tasks.uploader import gallery_uploader, upload_main_image
 
-config.dictConfig(log_config)
-logger = logging.getLogger('mainLog')
-payload = {}
-headers = {}
+logger = settings.logger
+
 requestsList = {'update_id': [], 'post': []}
 media_path = {'image': [], 'media_group_id': []}
-old_requests = []
+media_files = old_requests = []
 count = 0
-kadin_ids = [-1001411372097, -1001188747858, -1001147535835, -1001237631051]
+kadin_ids = settings.women_ids
 messageDate = messageGroupID = responseData = Cmessage = Main = MCategory = category_json = None
 
 def response_body(code, text):
@@ -43,13 +41,14 @@ def check_request(req):
             old_requests.append(req.json['update_id'])
 
 # Main incoming req processor
-@fastapi_app.post("/")
+@flask_app.post("/")
 async def index(req):
     global bot, old_requests, media_path, count, messageDate, MCategory, kadin_ids
     global messageGroupID, responseData, Cmessage, Main, categories, reqResponse
 
     try:
-        reqResponse = telegram.Update.de_json(req.json, bot)
+        channel = req.message.input_chat
+        
         if reqResponse.message:
             processedRequest = reqResponse.message
         elif reqResponse.channel_post:
@@ -71,10 +70,6 @@ async def index(req):
                 responseData = None
                 if processedRequest.chat_id in kadin_ids:
                     MCategory = 127443592
-                elif processedRequest.chat_id == -1001338146588:
-                    MCategory = 127443595
-                elif processedRequest.chat_id == -1001338084491:
-                    MCategory = 127443378
                 else:
                     MCategory = None
                     return Response('ok', status=406)
@@ -84,35 +79,16 @@ async def index(req):
                 Cmessage = processedRequest.caption
                 messageDate = processedRequest.date
                 messageGroupID = processedRequest.media_group_id
+                media_files.sort()
 
         if messageGroupID:
-            if any(media_path.values()) == True:
-                clearMediaList(media_path, clear=True)
-            for c in requestsList['post']:
-                if messageGroupID == c.media_group_id:
-                    if c.photo:
-                        fid = c.photo[len(c.photo) - 1].file_id
-                    else:
-                        fid = c.video.file_id
-                    NewFile = chord(media_downloader.subtask((
-                        [fid])))(DownloadCallback.subtask())
-                    NewFile.get()
-                    if NewFile:
-                        media_path['image'].append(
-                            NewFile.result[0])
-                        media_path['media_group_id'].append(
-                            c.media_group_id)
-                    else:
-                        logger.info(
-                            f"Files download is not successful | Message ID: {c.message_id}")
-                else:
-                    continue
+                clear_all(media_path)
+                await download_media_files(channel)
 
         if Cmessage:
-
             Main = None
             responseData = chord(create_product.subtask(
-                (Cmessage, MCategory, [category_json])))(NewProductCallback.subtask())
+                (Cmessage, MCategory, [category_json], [media_path])))(NewProductCallback.subtask())
             responseData.get()
             if hasattr(responseData, 'result'):
                 responseData = responseData.result
@@ -122,42 +98,35 @@ async def index(req):
 
         if responseData:
             if any(media_path['image']):
-                media_list = []
 
                 # Media check
-                media_path, video_files = media_check(media_path)
+                video_files = await media_check(media_path)
                 if video_files:
                     for video in video_files:
                         video_processing = chord(vid2Gif.subtask(
                             [video]))(mediaCallback.subtask())
                         video_processing.get()
-                        if re.search('mp4', video_processing.result[0]):
-                            pass
-                        else:
-                            media_list.append(
-                                video_processing.result[0])
+                        media_path['image'].append(
+                                    video_processing.result[0])
+                        if re.search('.mp4', video):
+                                media_path['image'].remove(video)
 
                 # Uploads main image
                 Main = media_path['image'][0]
-                uploadMain = chord(UploadMainIMG.subtask(
-                    (responseData, Main, headers)))(dummy.subtask())
+                uploadMain = chord(upload_main_image.subtask(
+                    (responseData, Main)))(dummy.subtask())
                 uploadMain.get()
 
                 if messageGroupID == media_path['media_group_id'][0]:
 
                     # Uploads gallery images
-                    uploadMedia = chord(uploader.subtask(
-                        (responseData, [media_list], Main)))(mediaCallback.subtask())
+                    uploadMedia = chord(gallery_uploader.subtask(
+                        (responseData, [media_path['image']], Main)))(mediaCallback.subtask())
                     uploadMedia.get()
-                    clearMediaList((media_path), clear=True)
-                    logger.info(
-                        f'Message update ID: {req.json["update_id"]}')
-
-                    # Response feedback
-                    logger.info(
-                        f"Files has been uploaded for product: {responseData} | Status: 200 | Reason: ok")
+                    clear_all(media_path)
                     return response_body(200, 'ok')
                 else:
+                    clear_all(media_path)                    
                     messageGroupID = None
                     return response_body(412, f'Files has not been uploaded for product: {responseData} | Reason: error')
 
@@ -169,15 +138,15 @@ async def index(req):
         else:
             return response_body(203, 'Media files ok')
 
-    except telegram.error.BadRequest as e:
-        if re.match('File is too big', e):
-            logger.warning(
-                'Post contains a big file and will not be downloaded!'
-            )
-            return response_body(412, 'Post contains a big file and will not be downloaded!')
-        logger.warning(
-            f'Telegram error: {e} | Message ID: {processedRequest.message_id}')
-        return response_body(412, f'Telegram error: {e} | Message ID: {processedRequest.message_id}')
+    # except telegram.error.BadRequest as e:
+    #     if re.match('File is too big', e):
+    #         logger.warning(
+    #             'Post contains a big file and will not be downloaded!'
+    #         )
+    #         return response_body(412, 'Post contains a big file and will not be downloaded!')
+    #     logger.warning(
+    #         f'Telegram error: {e} | Message ID: {processedRequest.message_id}')
+    #     return response_body(412, f'Telegram error: {e} | Message ID: {processedRequest.message_id}')
     except KeyError as e:
         logger.exception(e)
         pass
@@ -188,7 +157,7 @@ async def index(req):
         logger.warning(
             f"Task script File Not Found Error:  {e} | Message ID: {processedRequest} | Media: {media_path} | List: {requestsList}"
         )
-        clearMediaList((media_path, requestsList), files=True)
+        clear_all(media_path)
         return response_body(412, f"Task script File Not Found Error:  {e} | Message ID: {processedRequest} | Media: {media_path} | List: {requestsList}")
     except ValueError as e:
         logger.exception(e)
@@ -198,7 +167,7 @@ async def index(req):
         return response_body(412, f'Attribute error: {e}')
 
 
-# @fastapi_app
+# @flask_app
 # def afterRequest(response):
 #     global reqResponse
 #     try:
@@ -225,14 +194,15 @@ async def index(req):
 #     return response
 
 
-@fastapi_app.get("/setWebhook/")
+@flask_app.route("/setWebhook/")
 def setWebhook():
+    token = settings.token
     url = f"https://api.telegram.org/bot{token}/"
 
     responseDel = requests.get(url + 'setWebhook?remove=',
-                               json=payload, headers=headers)
+                               json=settings.payload, headers=settings.ecwid_headers)
     responsePost = requests.post(
-        url + 'setWebhook?url=' + Target, headers=headers, json=payload)
+        url + 'setWebhook?url=' + settings.Target, headers=settings.ecwid_headers, json=settings.payload)
 
     if responsePost.status_code == 200:
         logger.info(
@@ -246,13 +216,40 @@ def setWebhook():
         return response_body(412, "Webhook has not been set successfully")
 
 
-# @fastapi_app.route("/main", methods=["GET", "POST"])
-# def main_page():
-#     return render_template("main.html")
+@flask_app.route("/main", methods=["GET", "POST"])
+def main_page():
+    return render_template("main.html")
+
+
+
+async def download_media_files(channel):
+    count = 0
+    async for entity in client.iter_messages(entity=channel, wait_time=0, min_id=media_files[0], max_id=media_files[len(media_files)-1]+1):
+        if messageGroupID == entity.grouped_id:
+            count += 1
+            file = ''
+            if entity.photo:
+                file = f'photo{count}.jpg'
+            else:
+                file = f'video{count}.mp4'
+
+            NewFile = await client.download_media(entity, f"media/{file}")
+            if NewFile:
+                media_path['image'].append(
+                                NewFile)
+                media_path['grouped_id'].append(
+                                entity.grouped_id)
+            else:
+                logger.error(
+                                f"Files download is not successful | Message ID: {entity.id}")
+        else:
+            continue
+
+
+
+
 
 # clearing the console from unnecessary
-
-
 def cls(): return os.system('cls')
 
 
@@ -298,6 +295,5 @@ logger.info('Server started')
 
 if __name__ == '__main__':
     main()
-    fastapi_app.debug = True
-    # fastapi_app.run()
-    uvicorn.run(fastapi_app, host="127.0.0.1", port=8000)
+    flask_app.debug = True
+    flask_app.run()

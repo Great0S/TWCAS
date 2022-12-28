@@ -1,33 +1,30 @@
 import json
-import logging
 import os
+
 import requests
-from logging import config
 
-from config.logger import log_config
+from config.settings import settings
 
-config.dictConfig(log_config)
-logger = logging.getLogger('mainLog')
 categories = {'id': [], 'name': [], 'nameEn': [], 'parentId': []}
-eurl = "https://app.ecwid.com/api/v3/63690252/products"
-curl = "https://app.ecwid.com/api/v3/63690252/categories?token=secret_4i936SRqRp3317MZ51Aa4tVjeUVyGwW7"
-eheaders = {
-    "Authorization": "Bearer secret_4i936SRqRp3317MZ51Aa4tVjeUVyGwW7",
-    "Content-Type": 'application/json;charset: utf-8'
-}
+
+# Config
+logger = settings.logger
+products_url = settings.products_url
+category_url = settings.category_url + settings.ecwid_token
+headers = settings.ecwid_headers
 
 
 def dump_categories():
 
     # Creating a Get request for categories
-    r1 = requests.get(eurl, headers=eheaders).json()
-    pages = int(r1['total'])
+    products_response = requests.get(products_url, headers=headers).json()
+    pages = int(products_response['total'])
     
 
     # Pulling categories data and storing them in a list
     for offset in range(0, pages, 100):
-        r2 = requests.get(curl + '&offset=' + str(offset)).json()
-        items_list = r2['items']
+        category_response = requests.get(category_url + '&offset=' + str(offset)).json()
+        items_list = category_response['items']
 
         # Loading primary categories info
         for value in items_list:
@@ -50,7 +47,7 @@ def check_category():
     global categories
     File_path = 'extraction/categories.json'
     if os.path.exists(File_path):
-        request_category = requests.get(curl, headers=eheaders).json()
+        request_category = requests.get(category_url, headers=headers).json()
         category_total = int(request_category['total'])
         # Dumping categories into a dict var
         open_json = open('extraction/categories.json', encoding='utf-8')
