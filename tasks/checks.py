@@ -6,6 +6,7 @@ from moviepy.editor import VideoFileClip
 from config.settings import settings
 
 logger = settings.logger
+count = 0
 
 def media_check(media_path):
     global GifFile, count
