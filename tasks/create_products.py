@@ -4,7 +4,6 @@ import re
 import requests
 
 from config.settings import settings
-from models.category_filling import category_fill
 from models.category_processor import category_processor
 from models.options_processor import options_fill
 from models.text_processor import text_processor
@@ -74,8 +73,9 @@ def create_product(message, MCategory, categories, media_path):
                     f'Brand found with sku: {sku}')
                 return
             
-            main_category, main_category_en = category_processor(
-                telegram_category, main_category, categories)
+            # Assigning categories using a for loop and a condition to match stored category list
+            main_category, main_category_en ,category_ids, main_category_id, category_json = category_processor(
+                telegram_category, categories, MCategory)
 
             # Options values
             OpValues = [2, 3, 5]
@@ -83,9 +83,6 @@ def create_product(message, MCategory, categories, media_path):
 
             # Extract options from processed text
             options_fill(RefinedTxt, false, OpValues, OpBody)
-            # Assigning categories using a for loop and a condition to match stored category list
-            category_ids, main_category_id, category_json = category_fill(
-                main_category, categories, MCategory)
 
             # Create a product request body   
             if main_category_en:         
