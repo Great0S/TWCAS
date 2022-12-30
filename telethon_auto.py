@@ -1,4 +1,3 @@
-import asyncio
 import glob
 import logging
 import os
@@ -53,11 +52,7 @@ async def handler(event):
             logger.info(
                 f"Text request with index {count} has been added")
             responseData = None
-            # if request.chat_id in kadin_ids:
             MCategory = 127443592
-            # else:
-            #     MCategory = 0
-            #     return logger.warning(f"Category unknown | Message: {request.message.id}")
 
             Cmessage = request.message
             messageDate = request.date

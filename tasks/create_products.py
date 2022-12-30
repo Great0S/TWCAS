@@ -19,7 +19,8 @@ arabic_translate = settings.arabic_translate
 @celery.task()
 def create_product(message, MCategory, categories, media_path):
     global ResContent, Main, body, seoNameEn
-
+    main_category = main_category_en = None
+    
     # Checking message type
     if message:
         try:
@@ -72,12 +73,9 @@ def create_product(message, MCategory, categories, media_path):
                 logger.warning(
                     f'Brand found with sku: {sku}')
                 return
-            main_category = ''
-            category_names = set(categories['name'])
-            main_category = category_processor(
-                telegram_category, main_category, category_names)
-            CatName = categories['name']
-            CatId = categories['id']
+            
+            main_category, main_category_en = category_processor(
+                telegram_category, main_category, categories)
 
             # Options values
             OpValues = [2, 3, 5]
@@ -86,21 +84,13 @@ def create_product(message, MCategory, categories, media_path):
             # Extract options from processed text
             options_fill(RefinedTxt, false, OpValues, OpBody)
             # Assigning categories using a for loop and a condition to match stored category list
-            secName, Category, MainCategory, Cats = category_fill(
-                main_category, CatName, CatId, MCategory)
+            category_ids, main_category_id, category_json = category_fill(
+                main_category, categories, MCategory)
 
-            # Create a product request body
-            if secName:
-                if categories['name']:
-                    for catNam in categories['name']:
-                        if catNam == secName:
-                            seoNameEn = categories['name'].index(catNam)
-                            break
-                seoNameEn = categories['nameEn'][seoNameEn] + ' / ' + nameEn
-                seoName = secName + ' / ' + name
-            else:
-                seoName = name
-                seoNameEn = nameEn
+            # Create a product request body            
+            seoNameEn = main_category_en + ' / ' + nameEn
+            seoName = main_category + ' / ' + name
+            
             body = {
                 "sku": sku,
                 "unlimited": true,
@@ -118,9 +108,9 @@ def create_product(message, MCategory, categories, media_path):
                     "ar": "<b>اختار/ي أفضل المنتجات من مئات الماركات الراقية التركية. نقدم لك/ي أكبر تشكيلة    من الملابس التركية واحدث الصيحات في الأزياء النسائية والرجالية والاطفال التي تناسب جميع الأذواق.   بمقاسات وألوان مختلفة.</b>",
                     "en": "<b>Choose the best products from hundreds of Turkish high-end brands. We offer you the largest selection of Turkish clothes and the latest trends in women's, men's and children's fashion that suit all tastes. In different sizes and colors.</b>"
                 },
-                "categoryIds": Category,
-                "categories": Cats,
-                "defaultCategoryId": MainCategory,
+                "categoryIds": category_ids,
+                "categories": category_json,
+                "defaultCategoryId": main_category_id,
                 "seoTitle": f'{seoNameEn}',
                 "seoTitleTranslated": {
                     "ar": seoName,

@@ -2,14 +2,17 @@ from config.settings import settings
 
 logger = settings.logger
 
-def category_processor(telegram_category, main_category, category_names):
+def category_processor(telegram_category, main_category, categories):
+    main_category_en = None
     try:
-        for name in category_names:
-            if name == telegram_category:
-                main_category = telegram_category
-                break
-            else:
-                main_category = None
+        for value in categories:
+            for item in value:
+                if item['nameTranslated']['ar'] == telegram_category:
+                    main_category = telegram_category
+                    main_category_en = item['name']
+                    break
+                else:
+                    main_category = None
         if main_category:
             logger.info(
                 f"Category processed successfully | Arabic: {main_category}")
@@ -23,4 +26,4 @@ def category_processor(telegram_category, main_category, category_names):
     except IndexError as e:
         logger.warning(f'Category processor ValueError occurred: {e}')
         pass
-    return main_category
+    return main_category, main_category_en
