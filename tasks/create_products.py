@@ -87,9 +87,16 @@ def create_product(message, MCategory, categories, media_path):
             category_ids, main_category_id, category_json = category_fill(
                 main_category, categories, MCategory)
 
-            # Create a product request body            
-            seoNameEn = main_category_en + ' / ' + nameEn
-            seoName = main_category + ' / ' + name
+            # Create a product request body   
+            if main_category_en:         
+                seoNameEn = main_category_en + ' / ' + nameEn
+            else:
+                seoNameEn = nameEn
+                
+            if main_category_en:     
+                seoName = main_category + ' / ' + name
+            else:
+                seoName = name
             
             body = {
                 "sku": sku,
