@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     phone: int = 905434050709
     token: str = '5754073767:AAE3IbbE7-zXKGMg1fqunFxsUOg5K-kH6GI'
     channel_id: str = '@BeyanStorebot'
-    session_name: str = 'tele_bot'
+    session_name: str = 'women_tele_bot'
 
     # Telegram Channels info
     women_ids = [-1001411372097, -1001188747858, -1001147535835, -1001237631051, -1001653408221]

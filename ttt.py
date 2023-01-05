@@ -1,57 +1,151 @@
+import glob
+import logging
+import os
+import re
+import time
+from logging import config
+
+from telethon import errors, events
+
+from app.tele_bot import bot as client
+from config.logger import log_config
 from config.settings import settings
 from models.dump_category import check_category
-logger = settings.logger
+from tasks.checks import (incoming_message_check, media_check,
+                          vid2Gif)
+from tasks.create_products import create_product
+from tasks.uploader import gallery_uploader, upload_main_image
 
-categors = check_category()
-main_category = 'جاكيتات ومعاطف'
-MCategory = 127443592
+config.dictConfig(log_config)
+logger = logging.getLogger('mainLog')
+payload = {}
+media_files = old_requests = []
+media_path = {'image': [], 'grouped_id': []}
+count = 0
+kadin_ids = settings.women_ids
+client.start(phone=settings.phone)
+client.flood_sleep_threshold = 0
 
-def category_fill(main_category, categors, MCategory):
-    global default_category_name
-    default_category_ID = None
-    default_category_name = None
-    for value in categors:
-        for item in value:
-            if item['nameTranslated']['ar'] == main_category:
-                default_category_name = item['nameTranslated']['ar']
-                default_category_ID = item['id']
-                break
-            elif item['nameTranslated']['ar'] == main_category:
-                if item['parentId'] == MCategory:
-                    default_category_name = main_category
-                    default_category_ID = item['id']
-            else:
-                default_category_ID = None
-                default_category_name = None
-                categories_ids = []
-                continue
 
-    main_category_id = int(MCategory)
+def clear_all(media_path):
+    media_path['image'].clear()
+    media_path['grouped_id'].clear()
+    Files = glob.glob('media/*')
+    for file in Files:
+        os.remove(file)
 
-    # Validating categories_ids data
+
+@client.on(events.NewMessage(chats=kadin_ids))
+async def handler(event):
+    global old_requests, media_path, count, messageDate, MCategory, kadin_ids, url
+    global messageGroupID, responseData, Cmessage, Main, categories, reqResponse
     try:
-        if default_category_ID == main_category_id:
-            categories_ids = [main_category_id]
-            categories_json = {"id": main_category_id,
-                               "enabled": True}
-        elif not default_category_ID:
-            categories_ids = [main_category_id]
-            categories_json = {"id": main_category_id,
-                               "enabled": True}
-        else:
-            categories_ids = [main_category_id, default_category_ID]
-            categories_json = {"id": main_category_id,
-                               "enabled": True}, {"id": default_category_ID,
-                                                  "enabled": True}
+        channel = client.session.get_input_entity(event.message.chat_id)
+        request = incoming_message_check(event)
+        if request.photo or request.video:
+            media_files.append(event.id)
+            logger.info(
+                f"Media request with index {count} has been added | Group: {request.grouped_id}")
+            count += 1
 
-    except Exception as e:
-        logger.exception(f"Category filling error occurred: {e}")
-        default_category_ID = main_category_id
-        categories_ids = [main_category_id]
-        # noinspection PyDictDuplicateKeys
-        categories_json = {"id": main_category_id,
-                           "enabled": True}
-    logger.info("Category filling is done")
-    return default_category_name, categories_ids, main_category_id, categories_json
+        if request.message:
+            logger.info(
+                f"Text request with index {count} has been added | Group: {request.grouped_id}")
+            responseData = None
+            MCategory = 127443592
 
-category_fill(main_category, categors, MCategory)
+            Cmessage = request.message
+            messageDate = request.date
+            messageGroupID = request.grouped_id
+            media_files.sort()
+            client.receive_updates = False
+
+            if messageGroupID:
+                clear_all(media_path)
+                await download_media_files(channel)
+                media_files.clear()
+
+            if Cmessage:
+                Main = None
+                responseData = create_product(
+                    Cmessage, MCategory, categories, media_path)
+                Cmessage = messageDate = None
+
+            if responseData:
+                if any(media_path['image']):
+
+                    # Media check
+                    video_files = media_check(media_path)
+                    if video_files:
+                        for video in video_files:
+                            video_processing = vid2Gif(video)
+                            media_path['image'].append(
+                                    video_processing)
+                            if re.search('.mp4', video):
+                                media_path['image'].remove(video)
+
+                    # Uploads main image
+                    Main = media_path['image'][0]
+                    upload_main_image(responseData, Main)
+
+                    if messageGroupID == media_path['grouped_id'][0]:
+                        # Uploads gallery images
+                        gallery_uploader(
+                            responseData, media_path['image'], Main)
+                        clear_all(media_path)
+                    else:
+                        messageGroupID = None
+                        logger.error(
+                            f'Files has not been uploaded for product: {responseData} | Message ID: {event.id} | Reason: media group id mismatch | Message group id: {messageGroupID} | Media group id: {media_path["grouped_id"][0]}')
+                        clear_all(media_path)
+                        client.receive_updates = True
+
+                else:
+                    logger.info(
+                        f"Product created, but no media!? | Message ID: {event.id} | Files: {media_path}")
+
+    except errors.FloodWaitError as e:
+        logger.error('Flood wait for ', e.seconds)
+        time.sleep(e.seconds)
+    except errors.rpcerrorlist.AuthKeyDuplicatedError as e:
+        logger.error(e)
+
+
+async def download_media_files(channel):
+    count = 0
+    # max_id=media_files[len(media_files)-1]+1):
+    async for entity in client.iter_messages(entity=channel, wait_time=1, ids=media_files):
+            count += 1
+            file = ''
+            if entity.photo:
+                file = f'photo{count}.jpg'
+            else:
+                file = f'video{count}.mp4'
+
+            NewFile = await client.download_media(entity, f"media/{file}")
+            if NewFile:
+                media_path['image'].append(
+                                NewFile)
+                media_path['grouped_id'].append(
+                                entity.grouped_id)
+            else:
+                logger.error(
+                    f"Files download is not successful | Message ID: {entity.id}")
+        
+def cls(): return os.system('clear')
+
+
+cls()
+
+logger.info("Scraper started")
+
+
+async def main():
+    global categories
+    categories = check_category()
+
+    async with client:
+        await client.run_until_disconnected()
+
+client.loop.run_until_complete(main())
+logger.info("Scraping finished!")

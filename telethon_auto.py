@@ -40,7 +40,10 @@ async def handler(event):
     global old_requests, media_path, count, messageDate, MCategory, kadin_ids, url
     global messageGroupID, responseData, Cmessage, Main, categories, reqResponse
     try:
-        channel = client.session.get_input_entity(event.message.chat_id)
+        if os.path.exists('women_tele_bot.session'):
+            channel = client.session.get_input_entity(event.message.chat_id)
+        else:
+            channel = await client.get_entity(event.message.chat_id)
         request = incoming_message_check(event)
         if request.photo or request.video:
             media_files.append(event.id)
@@ -64,7 +67,14 @@ async def handler(event):
                 clear_all(media_path)
                 await download_media_files(channel)
                 media_files.clear()
-
+            elif not messageGroupID and len(media_files) <= 2:
+                clear_all(media_path)
+                await download_media_files(channel)
+                media_files.clear()
+            else:
+                logger.error(f"No media group id found | Media files length: {len(media_files)} | Text: {Cmessage}")
+                media_files.clear()
+                
             if Cmessage:
                 Main = None
                 responseData = create_product(
@@ -88,17 +98,21 @@ async def handler(event):
                     # Uploads main image
                     Main = media_path['image'][0]
                     upload_main_image(responseData, Main)
+                    del media_path['image'][0]
 
-                    if messageGroupID == media_path['grouped_id'][0]:
-                        # Uploads gallery images
-                        gallery_uploader(responseData, media_path['image'], Main)
-                        clear_all(media_path)
-                    else:
-                        messageGroupID = None
-                        logger.error(
-                            f'Files has not been uploaded for product: {responseData} | Message ID: {event.id} | Reason: media group id mismatch | Message group id: {messageGroupID} | Media group id: {media_path["grouped_id"][0]}')
-                        clear_all(media_path)
-                        client.receive_updates = True
+                    for group_id in media_path['grouped_id']:
+                        if messageGroupID == group_id:
+                            
+                            # Uploads gallery images
+                            gallery_uploader(
+                                responseData, media_path['image'])
+                            clear_all(media_path)
+                            client.receive_updates = True
+                            break
+                        else:
+                            del media_path['grouped_id'][media_path['grouped_id'].index(group_id)]
+                            del media_path['image'][media_path['grouped_id'].index(group_id)]                          
+                            continue
 
 
                 else:
@@ -110,13 +124,15 @@ async def handler(event):
         time.sleep(e.seconds)
     except errors.rpcerrorlist.AuthKeyDuplicatedError as e:
         logger.error(e)
+    except ValueError as e:
+        if re.findall('Could not find input entity with key', e.args[0]):
+            channel = await client.get_input_entity(event.message.chat_id)
 
 async def download_media_files(channel):
     count = 0
     async for entity in client.iter_messages(entity=channel, wait_time=1, ids=media_files): #max_id=media_files[len(media_files)-1]+1):
-        if messageGroupID == entity.grouped_id:
             count += 1
-            file = ''
+            file = None
             if entity.photo:
                 file = f'photo{count}.jpg'
             else:
@@ -130,8 +146,6 @@ async def download_media_files(channel):
                                 entity.grouped_id)
             else:
                 logger.error(f"Files download is not successful | Message ID: {entity.id}")
-        else:
-            continue
     
 
 
