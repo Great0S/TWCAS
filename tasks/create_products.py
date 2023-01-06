@@ -8,15 +8,14 @@ from models.category_processor import category_processor
 from models.options_processor import options_fill
 from models.text_processor import text_processor
 from tasks.checks import clear_all
-from app.celery_server import celery
+from tasks.erros_notify import feedback
 
 logger = settings.logger
 arabic_translate = settings.arabic_translate
 
 
 # Creates a product and assign the main product image
-@celery.task()
-def create_product(message, MCategory, categories, media_path):
+async def create_product(message, MCategory, categories, media_path, alert):
     global ResContent, Main, body, seoNameEn
     main_category = main_category_en = None
     
@@ -28,22 +27,27 @@ def create_product(message, MCategory, categories, media_path):
 
             # Condition to check for invalid message length
             if len(RefinedTxt) < 7:
-                clear_all(media_path)
-                logger.error(
-                    f"Invalid message length found | Length: {len(RefinedTxt)}"
-                )
+                await clear_all(media_path)
+                await feedback(settings.session_name, f"Invalid message length found | Length: {len(RefinedTxt)}", 'error', alert)
                 return
 
             # Creating variables with ready to use data from telegram message
+            sku = RefinedTxt[6]
+            if re.search('-', sku):
+                sku = sku.replace("كود الموديل", "")
+                sku = sku.replace('-', '')
+                sku = sku.split()
+                sku = str(sku[1]) + '-' + str(sku[0])
+            else:
+                sku = re.sub('[^a-zA-Z\d\-]', '', sku)
             name = RefinedTxt[1].strip()
             nameEn = arabic_translate.translate(name)
             nameEn = re.sub('a ', '', nameEn)
             nameEn = nameEn.capitalize()
             # Checking for invalid criteria
             if re.search('السيري', name) or re.search('السيري', name):
-                clear_all(media_path)
-                logger.error(
-                    'Invalid name found')
+                await clear_all(media_path)
+                await feedback(settings.session_name, f"Invalid name found | Sku: {sku}", 'error', alert)                
                 return
 
             size = RefinedTxt[2]
@@ -54,14 +58,6 @@ def create_product(message, MCategory, categories, media_path):
             price = float(re.sub('[^\d|^\d.\d]', '', price))
             pcPrice = RefinedTxt[5]
             pcPrice = int(re.sub('\D', '', pcPrice))
-            sku = RefinedTxt[6]
-            if re.search('-', sku):
-                sku = sku.replace("كود الموديل", "")
-                sku = sku.replace('-', '')
-                sku = sku.split()
-                sku = str(sku[1]) + '-' + str(sku[0])
-            else:
-                sku = re.sub('[^a-zA-Z\d\-]', '', sku)
             true = True
             false = False
 
@@ -74,15 +70,15 @@ def create_product(message, MCategory, categories, media_path):
                 return
             
             # Assigning categories using a for loop and a condition to match stored category list
-            main_category, main_category_en ,category_ids, main_category_id, category_json = category_processor(
-                telegram_category, categories, MCategory)
+            main_category, main_category_en ,category_ids, main_category_id, category_json = await category_processor(
+                telegram_category, categories, MCategory, alert, sku)
 
             # Options values
             OpValues = [2, 3, 5]
             OpBody = []
 
             # Extract options from processed text
-            options_fill(RefinedTxt, false, OpValues, OpBody)
+            await options_fill(RefinedTxt, false, OpValues, OpBody, alert, sku)
 
             # Create a product request body   
             if main_category_en:         
@@ -144,7 +140,7 @@ def create_product(message, MCategory, categories, media_path):
             }
 
             # Parsing collected data
-            ResContent, resCode = poster(body)
+            ResContent, resCode = await poster(body)
             # Feedback and returning response and media_path new values
             if resCode == 200:
                 # Created product ID
@@ -155,26 +151,22 @@ def create_product(message, MCategory, categories, media_path):
                     )
                     return ItemId
                 else:
-                    logger.error(
-                        f"Product ID is empty?! | Response: {ResContent} | Sku: {sku}")
-                    return ItemId
+                    await feedback(settings.session_name, f"Product ID is empty?! | Response: {ResContent} | Sku: {sku}", 'error', alert)
+                    return None
 
             elif resCode == 400:
-                logger.error(
-                    f"New product body request parameters are malformed | Sku: {sku} | Error Message: {ResContent['errorMessage']} | Error code: {ResContent['errorCode']}"
-                )
-                clear_all(media_path)
+                await feedback(settings.session_name, f"New product body request parameters are malformed | Sku: {sku} | Error Message: {ResContent['errorMessage']} | Error code: {ResContent['errorCode']}", 'error', alert)
+                await clear_all(media_path)
                 return None
             elif resCode == 409:
                 logger.warning(
                     f"SKU_ALREADY_EXISTS: {sku} | Error Message: {ResContent['errorMessage']} | Error code: {ResContent['errorCode']}"
                 )
-                clear_all(media_path)
+                await clear_all(media_path)
                 return None
             else:
-                logger.info(
-                    f"Failed to create a new product")
-                clear_all(media_path)
+                await feedback(settings.session_name, f"Failed to create a new product | Sku: {sku}", 'error', alert)
+                await clear_all(media_path)
                 return None
 
         # Errors handling
@@ -190,7 +182,7 @@ def create_product(message, MCategory, categories, media_path):
             logger.exception(e)
             return None
 
-def poster(body):
+async def poster(body):
 
     # Sending the POST request to create the products
     postData = json.dumps(body)
@@ -198,4 +190,5 @@ def poster(body):
     resCode = int(response.status_code)
     response = json.loads(response.text.encode('utf-8'))
     logger.info("Body request has been sent")
+    
     return response, resCode

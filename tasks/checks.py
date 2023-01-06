@@ -26,7 +26,7 @@ def media_check(media_path):
     return video_files
 
 
-def vid2Gif(video):
+async def vid2Gif(video):
     global GifFile, count
     count += 1
     GifFile = f'media/animpic{str(count)}.gif'
@@ -46,14 +46,14 @@ def vid2Gif(video):
     logger.info(f"New gif file have been created | File name: {GifFile}")
     return GifFile
 
-def clear_all(media_path):
+async def clear_all(media_path):
     media_path['image'].clear()
     media_path['grouped_id'].clear()
     Files = glob.glob('media/*')
     for file in Files:
         os.remove(file)
         
-def incoming_message_check(reqResponse):
+async def incoming_message_check(reqResponse):
     if reqResponse:        
         if reqResponse.message:
             ContentMessage = reqResponse.message

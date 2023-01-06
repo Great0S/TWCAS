@@ -1,8 +1,9 @@
 from config.settings import settings
+from tasks.erros_notify import feedback
 
 logger = settings.logger
 
-def category_processor(telegram_category, categories, MCategory):
+async def category_processor(telegram_category, categories, MCategory, alert, sku):
     default_category_ID = default_category_name = default_category_name_en = None
     try:
         for value in categories:
@@ -19,8 +20,7 @@ def category_processor(telegram_category, categories, MCategory):
             logger.info(
                 f"Category processed successfully | Arabic: {default_category_name} | English: {default_category_name_en}")
         else:
-            logger.warning(
-                f"Category {telegram_category} is not on the list")
+            await feedback(settings.session_name, f"Category {telegram_category} is not on the list | Sku: {sku}", 'warning', alert)
         
         main_category_id = int(MCategory)
              
@@ -33,10 +33,10 @@ def category_processor(telegram_category, categories, MCategory):
             categories_json = {"id": main_category_id,
                                "enabled": True}, {"id": default_category_ID,
                                                   "enabled": True}
-        logger.info("Category filling is done")
+        logger.info("Category processing is done")
         
     except Exception as e:
-        logger.exception(f"Category filling error occurred: {e}")
+        await feedback(settings.session_name, f"Category processing error occurred: {e} | Sku: {sku}", 'exception', alert)
         default_category_ID = main_category_id
         categories_ids = [main_category_id]
         categories_json = {"id": main_category_id,
