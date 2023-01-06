@@ -16,7 +16,7 @@ arabic_translate = settings.arabic_translate
 
 # Creates a product and assign the main product image
 async def create_product(message, MCategory, categories, media_path, alert):
-    global ResContent, Main, body, seoNameEn
+    global ResContent, Main, body, seoNameEn, sku
     main_category = main_category_en = None
     
     # Checking message type
@@ -28,8 +28,8 @@ async def create_product(message, MCategory, categories, media_path, alert):
             # Condition to check for invalid message length
             if len(RefinedTxt) < 7:
                 await clear_all(media_path)
-                await feedback(settings.session_name, f"Invalid message length found | Length: {len(RefinedTxt)}", 'error', alert)
-                return
+                await feedback(settings.session_name, f"Invalid message length found | Length: {len(RefinedTxt)} | Text: {RefinedTxt}", 'error', alert)
+                return None, None
 
             # Creating variables with ready to use data from telegram message
             sku = RefinedTxt[6]
@@ -48,7 +48,7 @@ async def create_product(message, MCategory, categories, media_path, alert):
             if re.search('السيري', name) or re.search('السيري', name):
                 await clear_all(media_path)
                 await feedback(settings.session_name, f"Invalid name found | Sku: {sku}", 'error', alert)                
-                return
+                return None, None
 
             size = RefinedTxt[2]
             size = re.sub('\D', '', size)
@@ -67,7 +67,7 @@ async def create_product(message, MCategory, categories, media_path, alert):
                 clear_all(media_path)
                 logger.warning(
                     f'Brand found with sku: {sku}')
-                return
+                return None, None
             
             # Assigning categories using a for loop and a condition to match stored category list
             main_category, main_category_en ,category_ids, main_category_id, category_json = await category_processor(
@@ -149,38 +149,38 @@ async def create_product(message, MCategory, categories, media_path, alert):
                     logger.info(
                         f"Product created successfully with ID: {ItemId} | SKU: {sku}"
                     )
-                    return ItemId
+                    return ItemId, sku
                 else:
                     await feedback(settings.session_name, f"Product ID is empty?! | Response: {ResContent} | Sku: {sku}", 'error', alert)
-                    return None
+                    return None, None
 
             elif resCode == 400:
                 await feedback(settings.session_name, f"New product body request parameters are malformed | Sku: {sku} | Error Message: {ResContent['errorMessage']} | Error code: {ResContent['errorCode']}", 'error', alert)
                 await clear_all(media_path)
-                return None
+                return None, None
             elif resCode == 409:
                 logger.warning(
                     f"SKU_ALREADY_EXISTS: {sku} | Error Message: {ResContent['errorMessage']} | Error code: {ResContent['errorCode']}"
                 )
                 await clear_all(media_path)
-                return None
+                return None, None
             else:
                 await feedback(settings.session_name, f"Failed to create a new product | Sku: {sku}", 'error', alert)
                 await clear_all(media_path)
-                return None
+                return None, None
 
         # Errors handling
         except IndexError as e:
             logger.exception(e)
-            return None
+            return None, None
 
         except KeyError as e:
             logger.exception(e)
-            return None
+            return None, None
 
         except ValueError as e:
             logger.exception(e)
-            return None
+            return None, None
 
 async def poster(body):
 
