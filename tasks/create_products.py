@@ -84,11 +84,13 @@ async def create_product(message, MCategory, categories, media_path, alert):
             if main_category_en:         
                 seoNameEn = main_category_en + ' / ' + nameEn
             else:
+                main_category_en = 'wear'
                 seoNameEn = nameEn
                 
-            if main_category_en:     
+            if main_category:     
                 seoName = main_category + ' / ' + name
             else:
+                main_category = 'الملابس النسائية'
                 seoName = name
             
             body = {
@@ -103,10 +105,10 @@ async def create_product(message, MCategory, categories, media_path, alert):
                 "price": price,
                 "enabled": true,
                 "options": OpBody,
-                "description": "<b>Choose the best products from hundreds of Turkish high-end brands. We offer you the largest selection of Turkish clothes and the latest trends in women's, men's and children's fashion that suit all tastes. In different sizes and colors.</b>",
+                "description": f"<b>Choose from our collection of quality Turkish brands for {nameEn.lower()}. We offer you the largest selection of Turkish ladies {nameEn.lower()} and the latest trends in women's {main_category_en.lower()} fashion that suit all tastes. In different sizes and colours.</b>",
                 "descriptionTranslated": {
-                    "ar": "<b>اختار/ي أفضل المنتجات من مئات الماركات الراقية التركية. نقدم لك/ي أكبر تشكيلة    من الملابس التركية واحدث الصيحات في الأزياء النسائية والرجالية والاطفال التي تناسب جميع الأذواق.   بمقاسات وألوان مختلفة.</b>",
-                    "en": "<b>Choose the best products from hundreds of Turkish high-end brands. We offer you the largest selection of Turkish clothes and the latest trends in women's, men's and children's fashion that suit all tastes. In different sizes and colors.</b>"
+                    "ar": f"<b>اختاري أفضل {name} من ماركات {main_category} الراقية التركية. نقدم لكي تشكيلة من {name} التركية ذات الجودة العالية واحدث الصيحات في {main_category} النسائية التي تناسب جميع الأذواق. بمقاسات وألوان مختلفة.</b>",
+                    "en": f"<b>Choose from our collection of quality Turkish brands for {nameEn.lower()}. We offer you the largest selection of Turkish ladies {nameEn.lower()} and the latest trends in women's {main_category_en.lower()} fashion that suit all tastes. In different sizes and colours.</b>"
                 },
                 "categoryIds": category_ids,
                 "categories": category_json,
@@ -116,10 +118,10 @@ async def create_product(message, MCategory, categories, media_path, alert):
                     "ar": seoName,
                     "en": seoNameEn
                 },
-                "seoDescription": "Choose the best products from hundreds of Turkish high-end brands. We offer you the largest selection of Turkish clothes and the latest trends in women's, men's and children's fashion that suit all tastes. In different sizes and colours.",
+                "seoDescription": f"Choose from our collection of quality Turkish brands for {nameEn.lower()}. We offer you the largest selection of Turkish ladies {nameEn.lower()} and the latest trends in women's {main_category_en.lower()} fashion that suit all tastes. In different sizes and colours.",
                 "seoDescriptionTranslated": {
-                    "ar": "اختار/ي أفضل المنتجات من مئات الماركات الراقية التركية. نقدم لك/ي أكبر تشكيلة    من الملابس التركية واحدث الصيحات في الأزياء النسائية والرجالية والاطفال التي تناسب جميع الأذواق.   بمقاسات وألوان مختلفة.",
-                    "en": "Choose the best products from hundreds of Turkish high-end brands. We offer you the largest selection of Turkish clothes and the latest trends in women's, men's and children's fashion that suit all tastes. In different sizes and colours."
+                    "ar": f"اختاري أفضل {name} من ماركات {main_category} الراقية التركية. نقدم لكي تشكيلة من {name} التركية ذات الجودة العالية واحدث الصيحات في {main_category} النسائية التي تناسب جميع الأذواق. بمقاسات وألوان مختلفة.",
+                    "en": f"Choose from our collection of quality Turkish brands for {nameEn.lower()}. We offer you the largest selection of Turkish ladies {nameEn.lower()} and the latest trends in women's {main_category_en.lower()} fashion that suit all tastes. In different sizes and colours."
                 },
                 "attributes": [{"name": "Note", "nameTranslated": {"ar": "ملاحظة", "en": "Note"},
                                 "value": "The choice of colors is done at the start of processing the order.",
@@ -188,7 +190,11 @@ async def poster(body):
     postData = json.dumps(body)
     response = requests.post(settings.products_url, data=postData, headers=settings.ecwid_headers)
     resCode = int(response.status_code)
-    response = json.loads(response.text.encode('utf-8'))
-    logger.info("Body request has been sent")
+    if response.ok:
+        response = json.loads(response.text.encode('utf-8'))
+        logger.info("Body request has been sent successfuly")
+    else:
+        logger.error(f"An error ocurred in the body request || Response: {response} || Status: {resCode}")
+        response = None
     
     return response, resCode
