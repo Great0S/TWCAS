@@ -146,6 +146,8 @@ async def create_product(message, MCategory, categories, media_path, alert):
             # Feedback and returning response and media_path new values
             if resCode == 200:
                 # Created product ID
+                ResContent = json.loads(
+                    ResContent.text.encode('utf-8'))
                 if 'id' in ResContent:
                     ItemId = ResContent['id']
                     logger.info(
@@ -157,17 +159,21 @@ async def create_product(message, MCategory, categories, media_path, alert):
                     return None, None
 
             elif resCode == 400:
+                ResContent = json.loads(
+                    ResContent.text.encode('utf-8'))
                 await feedback(settings.session_name, f"New product body request parameters are malformed | Sku: {sku} | Error Message: {ResContent['errorMessage']} | Error code: {ResContent['errorCode']}", 'error', alert)
                 await clear_all(media_path)
                 return None, None
             elif resCode == 409:
+                ResContent = json.loads(
+                    ResContent.text.encode('utf-8'))
                 logger.warning(
                     f"SKU_ALREADY_EXISTS: {sku} | Error Message: {ResContent['errorMessage']} | Error code: {ResContent['errorCode']}"
                 )
                 await clear_all(media_path)
                 return None, None
             else:
-                await feedback(settings.session_name, f"Failed to create a new product | Sku: {sku}", 'error', alert)
+                await feedback(settings.session_name, f"Failed to create a new product | Response: {ResContent} | Status: {resCode} | Sku: {sku}", 'error', alert)
                 await clear_all(media_path)
                 return None, None
 
@@ -188,13 +194,9 @@ async def poster(body):
 
     # Sending the POST request to create the products
     postData = json.dumps(body)
-    response = requests.post(settings.products_url, data=postData, headers=settings.ecwid_headers)
+    response = requests.post(settings.products_url,
+                             data=postData, headers=settings.ecwid_headers)
     resCode = int(response.status_code)
-    if response.ok:
-        response = json.loads(response.text.encode('utf-8'))
-        logger.info("Body request has been sent successfuly")
-    else:
-        logger.error(f"An error ocurred in the body request || Response: {response} || Status: {resCode}")
-        response = None
-    
+    logger.info("Body request has been sent successfuly")
+
     return response, resCode

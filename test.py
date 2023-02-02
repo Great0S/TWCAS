@@ -53,6 +53,7 @@ async def create_product(message, MCategory, categories, media_path, alert):
             size = RefinedTxt[2]
             size = re.sub('\D', '', size)
             pcQty = RefinedTxt[3]
+            print(pcQty)
             pcQty = int(re.sub('\D', '', pcQty))
             price = RefinedTxt[4]
             price = float(re.sub('[^\d|^\d.\d]', '', price))
@@ -73,6 +74,7 @@ async def create_product(message, MCategory, categories, media_path, alert):
             main_category, main_category_en ,category_ids, main_category_id, category_json = await category_processor(
                 telegram_category, categories, MCategory, alert, sku)
 
+            hash = str+int
             # Options values
             OpValues = [2, 3, 5]
             OpBody = []
@@ -90,7 +92,7 @@ async def create_product(message, MCategory, categories, media_path, alert):
             if main_category:     
                 seoName = main_category + ' / ' + name
             else:
-                main_category = 'الملابس النسائية'
+                main_category = 'الملابس الرجالية'
                 seoName = name
             
             body = {
@@ -105,10 +107,10 @@ async def create_product(message, MCategory, categories, media_path, alert):
                 "price": price,
                 "enabled": true,
                 "options": OpBody,
-                "description": f"<b>Choose from our collection of quality Turkish brands for {nameEn.lower()}. We offer you the largest selection of Turkish ladies {nameEn.lower()} and the latest trends in women's {main_category_en.lower()} fashion that suit all tastes. In different sizes and colours.</b>",
+                "description": f"<b>Choose from our collection of quality Turkish brands for {nameEn}. We offer you the largest selection of Turkish male {nameEn} and the latest trends in men's {main_category_en} fashion that suit all tastes. In different sizes and colours.</b>",
                 "descriptionTranslated": {
-                    "ar": f"<b>اختاري أفضل {name} من ماركات {main_category} الراقية التركية. نقدم لكي تشكيلة من {name} التركية ذات الجودة العالية واحدث الصيحات في {main_category} النسائية التي تناسب جميع الأذواق. بمقاسات وألوان مختلفة.</b>",
-                    "en": f"<b>Choose from our collection of quality Turkish brands for {nameEn.lower()}. We offer you the largest selection of Turkish ladies {nameEn.lower()} and the latest trends in women's {main_category_en.lower()} fashion that suit all tastes. In different sizes and colours.</b>"
+                    "ar": f"<b>اختار أفضل {name} من ماركات {main_category} الراقية التركية. نقدم لك تشكيلة من {name} التركية ذات الجودة العالية واحدث الصيحات في {main_category} الرجالية التي تناسب جميع الأذواق. بمقاسات وألوان مختلفة.</b>",
+                    "en": f"<b>Choose from our collection of quality Turkish brands for {nameEn}. We offer you the largest selection of Turkish male {nameEn} and the latest trends in men's {main_category_en} fashion that suit all tastes. In different sizes and colours.</b>"
                 },
                 "categoryIds": category_ids,
                 "categories": category_json,
@@ -118,10 +120,10 @@ async def create_product(message, MCategory, categories, media_path, alert):
                     "ar": seoName,
                     "en": seoNameEn
                 },
-                "seoDescription": f"Choose from our collection of quality Turkish brands for {nameEn.lower()}. We offer you the largest selection of Turkish ladies {nameEn.lower()} and the latest trends in women's {main_category_en.lower()} fashion that suit all tastes. In different sizes and colours.",
+                "seoDescription": f"Choose from our collection of quality Turkish brands for {nameEn}. We offer you the largest selection of Turkish male {nameEn} and the latest trends in men's {main_category_en} fashion that suit all tastes. In different sizes and colours.",
                 "seoDescriptionTranslated": {
-                    "ar": f"اختاري أفضل {name} من ماركات {main_category} الراقية التركية. نقدم لكي تشكيلة من {name} التركية ذات الجودة العالية واحدث الصيحات في {main_category} النسائية التي تناسب جميع الأذواق. بمقاسات وألوان مختلفة.",
-                    "en": f"Choose from our collection of quality Turkish brands for {nameEn.lower()}. We offer you the largest selection of Turkish ladies {nameEn.lower()} and the latest trends in women's {main_category_en.lower()} fashion that suit all tastes. In different sizes and colours."
+                    "ar": f"اختار أفضل {name} من ماركات {main_category} الراقية التركية. نقدم لك تشكيلة من {name} التركية ذات الجودة العالية واحدث الصيحات في {main_category} الرجالية التي تناسب جميع الأذواق. بمقاسات وألوان مختلفة.",
+                    "en": f"Choose from our collection of quality Turkish brands for {nameEn}. We offer you the largest selection of Turkish male {nameEn} and the latest trends in men's {main_category_en} fashion that suit all tastes. In different sizes and colours."
                 },
                 "attributes": [{"name": "Note", "nameTranslated": {"ar": "ملاحظة", "en": "Note"},
                                 "value": "The choice of colors is done at the start of processing the order.",
@@ -146,6 +148,8 @@ async def create_product(message, MCategory, categories, media_path, alert):
             # Feedback and returning response and media_path new values
             if resCode == 200:
                 # Created product ID
+                ResContent = json.loads(
+                    ResContent.text.encode('utf-8'))
                 if 'id' in ResContent:
                     ItemId = ResContent['id']
                     logger.info(
@@ -157,17 +161,21 @@ async def create_product(message, MCategory, categories, media_path, alert):
                     return None, None
 
             elif resCode == 400:
+                ResContent = json.loads(
+                    ResContent.text.encode('utf-8'))
                 await feedback(settings.session_name, f"New product body request parameters are malformed | Sku: {sku} | Error Message: {ResContent['errorMessage']} | Error code: {ResContent['errorCode']}", 'error', alert)
                 await clear_all(media_path)
                 return None, None
             elif resCode == 409:
+                ResContent = json.loads(
+                    ResContent.text.encode('utf-8'))
                 logger.warning(
                     f"SKU_ALREADY_EXISTS: {sku} | Error Message: {ResContent['errorMessage']} | Error code: {ResContent['errorCode']}"
                 )
                 await clear_all(media_path)
                 return None, None
             else:
-                await feedback(settings.session_name, f"Failed to create a new product | Sku: {sku}", 'error', alert)
+                await feedback(settings.session_name, f"Failed to create a new product | Response: {ResContent} | Status: {resCode} | Sku: {sku}", 'error', alert)
                 await clear_all(media_path)
                 return None, None
 
@@ -188,9 +196,9 @@ async def poster(body):
 
     # Sending the POST request to create the products
     postData = json.dumps(body)
-    response = requests.post(settings.products_url, data=postData, headers=settings.ecwid_headers)
+    response = requests.post(settings.products_url,
+                             data=postData, headers=settings.ecwid_headers)
     resCode = int(response.status_code)
-    response = json.loads(response.text.encode('utf-8'))
-    logger.info("Body request has been sent")
-    
+    logger.info("Body request has been sent successfuly")
+
     return response, resCode
