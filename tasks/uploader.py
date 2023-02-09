@@ -15,7 +15,7 @@ async def upload_main_image(ItemId, Main, alert):
     if main_image_response.status_code == 200:
         logger.info(f'Main image uploaded successfully: {Main}')
     else:
-        await feedback(settings.session_name, f"Main image upload failed: {Main} | Product: {ItemId}", 'error', alert)
+        await feedback(settings.session_name, f"Main image upload failed: {Main} | Error: {main_image_response.status_code} | Product: {ItemId}", 'error', alert)
 
 # Adding gallery images to the product
 async def gallery_uploader(ItemId, media_path, alert):
@@ -30,4 +30,4 @@ async def gallery_uploader(ItemId, media_path, alert):
             if gallery_response.status_code == 200:
                 logger.info(f'Gallery image uploaded successfully: {img}')
             else:
-                await feedback(settings.session_name, f'Gallery image upload failed: {img} | Error: {gallery_response.content}', 'error', alert)             
+                await feedback(settings.session_name, f'Gallery image upload failed: {img} | Error: {gallery_response.status_code}', 'error', alert)             
