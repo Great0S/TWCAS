@@ -1,198 +1,200 @@
-import glob
 import json
-import os
 import re
-import time
 
-from telethon import errors, events
+import requests
 
-from app.tele_bot import bot as client
-from app.tele_bot import alert_bot as alert
 from config.settings import settings
-from models.dump_category import check_category
-from tasks.checks import clear_all, incoming_message_check, media_check, vid2Gif
-from tasks.create_products import create_product
+from models.category_processor import category_processor
+from models.options_processor import options_fill
+from models.text_processor import text_processor
+from tasks.checks import clear_all
 from tasks.erros_notify import feedback
-from tasks.uploader import gallery_uploader, upload_main_image
 
 logger = settings.logger
-payload = {}
-media_files = []
-media_path = {"image": [], "grouped_id": []}
-count = 0
-chat = settings.men_id
-client.start(phone=settings.phone)
-alert.start(bot_token=settings.alert_bot_token)
-client.flood_sleep_threshold = 0
+arabic_translate = settings.arabic_translate
 
 
-@client.on(events.NewMessage(chats=chat))
-async def handler(event):
-    global sku, media_path, count, messageDate, main_category_id, url
-    global messageGroupID, product_response, caption_message, main_image_name, categories, reqResponse
-    try:
-        if os.path.exists(f"{settings.session_name}.session"):
-            channel = client.session.get_input_entity(event.message.chat_id)
-        else:
-            channel = await client.get_entity(event.message.chat_id)
-        request = await incoming_message_check(event)
-        if request.photo or request.video:
-            media_files.append(request.id)
-            logger.info(f"Media request with index {count} has been added")
-            count += 1
+# Creates a product and assign the main product image
+async def create_product(message, MCategory, categories, media_path, alert):
+    global ResContent, Main, body, seoNameEn, sku
+    main_category = main_category_en = None
+    
+    # Checking message type
+    if message:
+        try:
+            # Text processing
+            RefinedTxt = text_processor(message)
 
-        if request.message:
-            logger.info(f"Text request with index {count} has been added")
-            product_response = None
-            main_category_id = settings.category_id
+            # Condition to check for invalid message length
+            if len(RefinedTxt) < 7:
+                await clear_all(media_path)
+                await feedback(settings.session_name, f"Invalid message length found | Length: {len(RefinedTxt)} | Text: {RefinedTxt}", 'error', alert)
+                return None, None
 
-            caption_message = request.message
-            messageDate = request.date
-            messageGroupID = request.grouped_id
-            media_files.sort()
-            client.receive_updates = False
-
-            if caption_message:
-                main_image_name = None
-                product_response, sku = await create_product(
-                    caption_message, main_category_id, categories, media_path, alert
-                )
-                caption_message = messageDate = None
-
-            if product_response:
-                if messageGroupID:
-                    await clear_all(media_path)
-                    await download_media_files(channel, messageGroupID, sku)
-                    media_files.clear()
-                elif not messageGroupID and len(media_files) <= 2:
-                    await clear_all(media_path)
-                    await download_media_files(channel, messageGroupID, sku)
-                    media_files.clear()
-                else:
-                    await feedback(
-                        settings.session_name,
-                        f"No media group id found | Text: {caption_message} | Sku: {sku}",
-                        "error",
-                        alert,
-                    )
-                    media_files.clear()
-
-                if any(media_path["image"]):
-                    # Media check
-                    video_files = media_check(media_path)
-                    if video_files:
-                        for video in video_files:
-                            video_processing = await vid2Gif(video)
-                            media_path["image"].append(video_processing)
-                            if re.search(".mp4", video):
-                                media_path["image"].remove(video)
-
-                    # Uploads main_image_name image
-                    main_image_name = media_path["image"][0]
-                    await upload_main_image(product_response, main_image_name, alert)
-                    del media_path["image"][0]
-
-                    for group_id in media_path["grouped_id"]:
-                        if messageGroupID == group_id:
-                            # Uploads gallery images
-                            await gallery_uploader(
-                                product_response, media_path["image"], alert
-                            )
-                            await clear_all(media_path)
-                            client.receive_updates = True
-                            break
-                        else:
-                            del media_path["grouped_id"][
-                                media_path["grouped_id"].index(group_id)
-                            ]
-                            del media_path["image"][
-                                media_path["grouped_id"].index(group_id)
-                            ]
-                            continue
-                else:
-                    await feedback(
-                        settings.session_name,
-                        f"Product created, but no media!? | Message ID: {event.id} | Files: {media_files} | Sku: {sku}",
-                        "error",
-                        alert,
-                    )
-
-    except errors.FloodWaitError as e:
-        logger.warning("Flood wait for ", e.seconds)
-        time.sleep(e.seconds)
-    except errors.rpcerrorlist.AuthKeyDuplicatedError as e:
-        logger.error(e)
-    except ValueError as e:
-        if re.findall("Could not find input entity with key", e.args[0]):
-            channel = await client.get_input_entity(event.message.chat_id)
-        else:
-            await feedback(
-                settings.session_name,
-                f"Value error: {e} | Message ID: {event.message.id}",
-                "error",
-                alert,
-            )
-    except TypeError as e:
-        await feedback(
-            settings.session_name,
-            f"Type error: {e} | Message ID: {event.message.id}",
-            "error",
-            alert,
-        )
-
-
-async def download_media_files(channel, group_id, sku):
-    count = 0
-    async for entity in client.iter_messages(
-        entity=channel, wait_time=1, ids=media_files
-    ):
-        if entity:
-            if entity.grouped_id == group_id:
-                count += 1
-                file = None
-                if entity.photo:
-                    file = f"photo{count}.jpg"
-                else:
-                    file = f"video{count}.mp4"
-
-                NewFile = await client.download_media(entity, f"media/{file}")
-                if NewFile:
-                    media_path["image"].append(NewFile)
-                    media_path["grouped_id"].append(entity.grouped_id)
-                else:
-                    await feedback(
-                        settings.session_name,
-                        f"Files download is not successful | Message ID: {entity} | Sku: {sku}",
-                        "error",
-                        alert,
-                    )
+            # Creating variables with ready to use data from telegram message
+            sku = RefinedTxt[6]
+            if re.search('-', sku):
+                sku = sku.replace("كود الموديل", "")
+                sku = sku.replace('-', '')
+                sku = sku.split()
+                sku = str(sku[1]) + '-' + str(sku[0])
             else:
-                continue
-        else:
-            await feedback(
-                settings.session_name,
-                f"Media message is empty | Sku: {sku}",
-                "error",
-                alert,
-            )
+                sku = re.sub('[^a-zA-Z\d\-]', '', sku)
+            name = RefinedTxt[1].strip()
+            nameEn = re.sub('a ', '', arabic_translate.translate(name)).capitalize()
+            # Checking for invalid criteria
+            if re.search('السيري', name) or re.search('السيري', name):
+                await clear_all(media_path)
+                await feedback(settings.session_name, f"Invalid name found | Sku: {sku}", 'error', alert)                
+                return None, None
 
+            size = RefinedTxt[2]
+            size = re.sub('\D', '', size)
+            pcQty = RefinedTxt[3]
+            pcQty = int(re.sub('\D', '', pcQty))
+            price = RefinedTxt[4]
+            price = float(re.sub('[^\d|^\d.\d]', '', price))
+            pcPrice = RefinedTxt[5]
+            pcPrice = int(re.sub('\D', '', pcPrice))
+            true = True
+            false = False
 
-def cls():
-    return os.system("clear")
+            # Category values
+            telegram_category = RefinedTxt[0].strip()
+            if re.search('ماركه', telegram_category) or re.search('ماركة', telegram_category):
+                clear_all(media_path)
+                logger.warning(
+                    f'Brand found with sku: {sku}')
+                return None, None
+            
+            # Assigning categories using a for loop and a condition to match stored category list
+            main_category, main_category_en ,category_ids, main_category_id, category_json = await category_processor(
+                telegram_category, categories, MCategory, alert, sku)
 
+            # Options values
+            OpValues = [2, 3, 5]
+            OpBody = []
 
-cls()
+            # Extract options from processed text
+            await options_fill(RefinedTxt, false, OpValues, OpBody, alert, sku)
 
-logger.info("Scraper started")
+            # Create a product request body   
+            if main_category_en:         
+                seoNameEn = main_category_en + ' / ' + nameEn
+            else:
+                main_category_en = 'wear'
+                seoNameEn = nameEn
+                
+            if main_category:     
+                seoName = main_category + ' / ' + name
+            else:
+                main_category = 'ملابس الاطفال'
+                seoName = name
+            
+            body = {
+                "sku": sku,
+                "unlimited": true,
+                "inStovalue": true,
+                "name": nameEn,
+                "nameTranslated": {
+                    "ar": name,
+                    "en": nameEn
+                },
+                "price": price,
+                "enabled": true,
+                "options": OpBody,
+                "description": f"<b>Choose from our collection of quality Turkish brands for {nameEn}. We offer you the largest selection of Turkish child {nameEn} and the latest trends in kids {main_category_en} fashion that suit all tastes. In different sizes and colours.</b>",
+                "descriptionTranslated": {
+                    "ar": f"<b>اختار أفضل {name} من ماركات {main_category} الراقية التركية. نقدم لك تشكيلة من {name} التركية ذات الجودة العالية واحدث الصيحات في {main_category} الاطفال التي تناسب جميع الأذواق. بمقاسات وألوان مختلفة.</b>",
+                    "en": f"<b>Choose from our collection of quality Turkish brands for {nameEn}. We offer you the largest selection of Turkish child {nameEn} and the latest trends in kids {main_category_en} fashion that suit all tastes. In different sizes and colours.</b>"
+                },
+                "categoryIds": category_ids,
+                "categories": category_json,
+                "defaultCategoryId": main_category_id,
+                "seoTitle": f'{seoNameEn}',
+                "seoTitleTranslated": {
+                    "ar": seoName,
+                    "en": seoNameEn
+                },
+                "seoDescription": f"Choose from our collection of quality Turkish brands for {nameEn}. We offer you the largest selection of Turkish child {nameEn} and the latest trends in kids {main_category_en} fashion that suit all tastes. In different sizes and colours.",
+                "seoDescriptionTranslated": {
+                    "ar": f"اختار أفضل {name} من ماركات {main_category} الراقية التركية. نقدم لك تشكيلة من {name} التركية ذات الجودة العالية واحدث الصيحات في {main_category} الاطفال التي تناسب جميع الأذواق. بمقاسات وألوان مختلفة.",
+                    "en": f"Choose from our collection of quality Turkish brands for {nameEn.lower()}. We offer you the largest selection of Turkish child {nameEn.lower()} and the latest trends in kids {main_category_en.lower()} fashion that suit all tastes. In different sizes and colours."
+                },
+                "attributes": [{"name": "Note", "nameTranslated": {"ar": "ملاحظة", "en": "Note"},
+                                "value": "The choice of colors is done at the start of processing the order.",
+                                "valueTranslated": {
+                    "ar": "اختيار الألوان يتم عند البدء بتجهيز الطلبية",
+                          "en": "The choice of colors is done at the start of processing the order."
+                }, "show":   "DESCR", "type": "UPC"}, {"name": "Brand", "nameTranslated": {"ar": "العلامة التجارية", "en": "Brand"},
+                                                       "value": "Al Beyan Fashion™",
+                                                       "valueTranslated": {
+                    "ar": "Al Beyan Fashion™",
+                    "en": "Al Beyan Fashion™"
+                }, "show":   "DESCR", "type": "BRAND"}],
+                "subtitle": "The displayed price is for the full set",
+                "subtitleTranslated": {
+                    "ar": "السعر المعروض للسيري كامل",
+                    "en": "The displayed price is for the full set"
+                }
+            }
 
+            # Parsing collected data
+            ResContent, resCode = await poster(body)
+            # Feedback and returning response and media_path new values
+            if resCode == 200 or resCode == 500:
+                # Created product ID
+                ResContent = json.loads(
+                    ResContent.text.encode('utf-8'))
+                if 'id' in ResContent:
+                    ItemId = ResContent['id']
+                    logger.info(
+                        f"Product created successfully with ID: {ItemId} | SKU: {sku}"
+                    )
+                    return ItemId, sku
+                else:
+                    await feedback(settings.session_name, f"Product ID is empty?! | Response: {ResContent} | Sku: {sku}", 'error', alert)
+                    return None, None
 
-async def main():
-    global categories
-    categories = check_category()
+            elif resCode == 400:
+                ResContent = json.loads(
+                    ResContent.text.encode('utf-8'))
+                await feedback(settings.session_name, f"New product body request parameters are malformed | Sku: {sku} | Error Message: {ResContent['errorMessage']} | Error code: {ResContent['errorCode']}", 'error', alert)
+                await clear_all(media_path)
+                return None, None
+            elif resCode == 409:
+                ResContent = json.loads(
+                    ResContent.text.encode('utf-8'))
+                logger.warning(
+                    f"SKU_ALREADY_EXISTS: {sku} | Error Message: {ResContent['errorMessage']} | Error code: {ResContent['errorCode']}"
+                )
+                await clear_all(media_path)
+                return None, None
+            else:
+                await feedback(settings.session_name, f"Failed to create a new product | Response: {ResContent} | Status: {resCode} | Sku: {sku}", 'error', alert)
+                await clear_all(media_path)
+                return None, None
 
-    async with client:
-        await client.run_until_disconnected()
+        # Errors handling
+        except IndexError as e:
+            logger.exception(e)
+            return None, None
 
+        except KeyError as e:
+            logger.exception(e)
+            return None, None
 
-client.loop.run_until_complete(main())
-logger.info("Scraping finished!")
+        except ValueError as e:
+            logger.exception(e)
+            return None, None
+
+async def poster(body):
+
+    # Sending the POST request to create the products
+    postData = json.dumps(body)
+    response = requests.post(settings.products_url,
+                             data=postData, headers=settings.ecwid_headers)
+    resCode = int(response.status_code)
+    logger.info("Body request has been sent successfuly")
+
+    return response, resCode

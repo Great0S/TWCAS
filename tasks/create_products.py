@@ -41,9 +41,7 @@ async def create_product(message, MCategory, categories, media_path, alert):
             else:
                 sku = re.sub('[^a-zA-Z\d\-]', '', sku)
             name = RefinedTxt[1].strip()
-            nameEn = arabic_translate.translate(name)
-            nameEn = re.sub('a ', '', nameEn)
-            nameEn = nameEn.capitalize()
+            nameEn = re.sub('a ', '', arabic_translate.translate(name)).capitalize()
             # Checking for invalid criteria
             if re.search('السيري', name) or re.search('السيري', name):
                 await clear_all(media_path)
@@ -144,7 +142,7 @@ async def create_product(message, MCategory, categories, media_path, alert):
             # Parsing collected data
             ResContent, resCode = await poster(body)
             # Feedback and returning response and media_path new values
-            if resCode == 200:
+            if resCode == 200 or resCode == 500:
                 # Created product ID
                 ResContent = json.loads(
                     ResContent.text.encode('utf-8'))
