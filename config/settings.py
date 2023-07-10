@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     # Telegram BOT info
     username: str = 'albeyanfashion2'
     phone: int = 905434050709
-    token: str = '5754073767:AAE3IbbE7-zXKGMg1fqunFxsUOg5K-kH6GI'
+    token: str = '5754073767:AAFrZD6tvP2syaTbblGD0Yu-FO1wD7LMS7w'
     channel_id: str = '@BeyanStorebot'
     session_name: str = 'women_tele_bot'
 
